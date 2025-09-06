@@ -32,7 +32,27 @@ npm run build
 
 The built extension will be in the `dist/` directory, ready to load in Chrome's developer mode.
 
+### Testing & Validation
+```bash
+npm test          # Build and validate extension
+npm run validate  # Validate existing build
+```
+
 ### Loading the Extension
 1. Open Chrome and go to `chrome://extensions/`
 2. Enable "Developer mode"
 3. Click "Load unpacked" and select the `dist/` directory
+4. Test with `test-page.html` to see the image blocking in action
+
+### Features Implemented
+- **Image Hiding**: Automatically hides all `<img>` elements and elements with background images
+- **Mutation Observer**: Watches for dynamically added images
+- **Settings UI**: Popup interface for configuring nudity threshold and behavior
+- **Chrome Extension Manifest V3**: Uses latest extension format with service worker
+- **IIFE Format**: All scripts properly wrapped for Chrome extension compatibility
+
+### Future Enhancements
+- Integrate with AI service for actual image classification
+- Add whitelist/blacklist functionality
+- Implement user feedback system for classification accuracy
+- Add keyboard shortcuts for quick enable/disable

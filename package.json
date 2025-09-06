@@ -8,7 +8,9 @@
     "build:vite": "vite build",
     "dev": "vite build --watch",
     "preview": "vite preview",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "npm run build && node test-build.js",
+    "validate": "node test-build.js"
   },
   "keywords": [],
   "author": "",
