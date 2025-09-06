@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean Web - Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .bg-image {
+            width: 200px;
+            height: 150px;
+            background-image: url('https://picsum.photos/200/150?random=1');
+            background-size: cover;
+            background-position: center;
+            border: 2px solid #333;
+            margin: 10px 0;
+        }
+        .bg-image2 {
+            width: 150px;
+            height: 100px;
+            background: url('https://picsum.photos/150/100?random=2') no-repeat center/cover;
+            border: 1px solid #666;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .dynamic-content {
+            min-height: 100px;
+            border: 2px dashed #ccc;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Clean Web Extension Test Page</h1>
+    <p>This page contains various types of images to test the mutation observer functionality.</p>
+    
+    <div class="test-section">
+        <h2>1. Static IMG Elements</h2>
+        <p>These images should be detected on page load:</p>
+        <img src="https://picsum.photos/300/200?random=3" alt="Test Image 1">
+        <img src="https://picsum.photos/250/180?random=4" alt="Test Image 2">
+        <img data-src="https://picsum.photos/200/150?random=5" alt="Lazy loaded image">
+    </div>
+
+    <div class="test-section">
+        <h2>2. Background Images (CSS)</h2>
+        <p>These background images should be detected:</p>
+        <div class="bg-image"></div>
+        <div class="bg-image2"></div>
+        <div style="width: 180px; height: 120px; background-image: url('https://picsum.photos/180/120?random=6'); background-size: cover; border: 1px solid #999;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Dynamic Content</h2>
+        <p>Use these buttons to test the mutation observer:</p>
+        <button onclick="addImage()">Add IMG Element</button>
+        <button onclick="addBackgroundImage()">Add Background Image</button>
+        <button onclick="changeImageSrc()">Change Image Source</button>
+        <button onclick="addComplexContent()">Add Complex Content</button>
+        
+        <div id="dynamic-content" class="dynamic-content">
+            <p>Dynamic content will appear here...</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Debug Info</h2>
+        <p>Open browser console to see detected images. The mutation observer should log all found images.</p>
+        <button onclick="showDetectedImages()">Show Detected Images in Console</button>
+        <button onclick="clearDynamicContent()">Clear Dynamic Content</button>
+    </div>
+
+    <script>
+        let imageCounter = 10;
+        
+        function addImage() {
+            const container = document.getElementById('dynamic-content');
+            const img = document.createElement('img');
+            img.src = `https://picsum.photos/200/150?random=${imageCounter++}`;
+            img.alt = `Dynamically added image ${imageCounter}`;
+            container.appendChild(img);
+        }
+        
+        function addBackgroundImage() {
+            const container = document.getElementById('dynamic-content');
+            const div = document.createElement('div');
+            div.style.width = '200px';
+            div.style.height = '150px';
+            div.style.backgroundImage = `url('https://picsum.photos/200/150?random=${imageCounter++}')`;
+            div.style.backgroundSize = 'cover';
+            div.style.border = '1px solid #333';
+            div.style.margin = '10px 0';
+            div.textContent = 'Background Image';
+            div.style.color = 'white';
+            div.style.textAlign = 'center';
+            div.style.lineHeight = '150px';
+            div.style.fontWeight = 'bold';
+            div.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
+            container.appendChild(div);
+        }
+        
+        function changeImageSrc() {
+            const images = document.querySelectorAll('#dynamic-content img');
+            if (images.length > 0) {
+                const img = images[Math.floor(Math.random() * images.length)];
+                img.src = `https://picsum.photos/200/150?random=${imageCounter++}`;
+            } else {
+                alert('No images to change. Add some images first!');
+            }
+        }
+        
+        function addComplexContent() {
+            const container = document.getElementById('dynamic-content');
+            const section = document.createElement('div');
+            section.innerHTML = `
+                <div style="border: 1px solid #ccc; padding: 15px; margin: 10px 0;">
+                    <h4>Complex Content Section</h4>
+                    <img src="https://picsum.photos/150/100?random=${imageCounter++}" alt="Nested image">
+                    <div style="width: 120px; height: 80px; background: url('https://picsum.photos/120/80?random=${imageCounter++}') center/cover; display: inline-block; margin-left: 10px;"></div>
+                    <p>This section contains both img elements and background images.</p>
+                </div>
+            `;
+            container.appendChild(section);
+        }
+        
+        function showDetectedImages() {
+            if (window.cleanWebImageDetector) {
+                const stats = window.cleanWebImageDetector.getStats();
+                console.log('=== Clean Web Image Detection Stats ===');
+                console.log('Total Images:', stats.totalImages);
+                console.log('IMG Elements:', stats.imgElements);
+                console.log('Background Images:', stats.backgroundImages);
+                console.log('Detected Image URLs:', Array.from(window.cleanWebImageDetector.detectedImages));
+                
+                // Show elements with our data attributes
+                const detectedElements = document.querySelectorAll('[data-clean-web-detected="true"]');
+                console.log('Elements with detected images:', detectedElements);
+                
+                alert(`Detected ${stats.totalImages} images total. Check console for details.`);
+            } else {
+                alert('Clean Web extension not detected. Make sure the extension is loaded.');
+            }
+        }
+        
+        function clearDynamicContent() {
+            const container = document.getElementById('dynamic-content');
+            container.innerHTML = '<p>Dynamic content cleared...</p>';
+        }
+        
+        // Log when page loads
+        console.log('Test page loaded. Clean Web should detect existing images.');
+    </script>
+</body>
+</html>
