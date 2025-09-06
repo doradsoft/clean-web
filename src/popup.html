@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 300px;
+            padding: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .setting {
+            margin-bottom: 12px;
+        }
+        .setting label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .setting input[type="range"] {
+            width: 100%;
+        }
+        .setting input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        .threshold-value {
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h3>Clean Web Settings</h3>
+    </div>
+    
+    <div class="setting">
+        <label>
+            <input type="checkbox" id="enabled"> Enable extension
+        </label>
+    </div>
+    
+    <div class="setting">
+        <label>
+            <input type="checkbox" id="hideImagesOnLoad"> Hide images by default
+        </label>
+    </div>
+    
+    <div class="setting">
+        <label for="nudityThreshold">Nudity sensitivity threshold</label>
+        <input type="range" id="nudityThreshold" min="0" max="1" step="0.1" value="0.3">
+        <div class="threshold-value">Current: <span id="thresholdValue">0.3</span></div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>
