@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean Web Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .bg-image-div {
+            width: 200px;
+            height: 150px;
+            background-image: url('https://via.placeholder.com/200x150/ff0000/ffffff?text=Background+Image');
+            background-size: cover;
+            border: 2px solid #333;
+            margin: 10px 0;
+        }
+        
+        .info {
+            background: #f0f8ff;
+            padding: 15px;
+            border-left: 4px solid #2196f3;
+            margin: 20px 0;
+        }
+        
+        h1 {
+            color: #333;
+        }
+        
+        h2 {
+            color: #666;
+            margin-top: 0;
+        }
+        
+        img {
+            margin: 10px 0;
+            border: 2px solid #ddd;
+        }
+        
+        video {
+            margin: 10px 0;
+            border: 2px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Clean Web Extension Test Page</h1>
+    
+    <div class="info">
+        <p><strong>Purpose:</strong> This page contains various types of image and video elements to test the Clean Web extension's ability to hide all images before processing.</p>
+        <p><strong>Expected Behavior:</strong> When the extension is active, all images, videos, and background images should be hidden immediately upon page load.</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>1. Regular IMG Elements</h2>
+        <p>These should be hidden by the extension:</p>
+        <img src="https://via.placeholder.com/300x200/0066cc/ffffff?text=Test+Image+1" alt="Test Image 1">
+        <img src="https://via.placeholder.com/250x150/cc6600/ffffff?text=Test+Image+2" alt="Test Image 2">
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Background Images</h2>
+        <p>This div has a background image that should be hidden:</p>
+        <div class="bg-image-div">
+            <p style="color: white; text-align: center; padding-top: 60px;">This should be hidden</p>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Inline Style Background Images</h2>
+        <p>These divs use inline styles for background images:</p>
+        <div style="width: 200px; height: 100px; background-image: url('https://via.placeholder.com/200x100/00cc66/ffffff?text=Inline+BG'); background-size: cover; border: 2px solid #333;">
+            <p style="text-align: center; padding-top: 40px; color: white;">Inline BG Image</p>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Video Elements</h2>
+        <p>This video element should be hidden:</p>
+        <video width="320" height="240" controls>
+            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+            <p>Your browser does not support HTML video.</p>
+        </video>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. Dynamically Added Content</h2>
+        <p>Click this button to add new images (these should also be hidden):</p>
+        <button onclick="addDynamicImage()">Add Dynamic Image</button>
+        <div id="dynamic-content"></div>
+    </div>
+    
+    <div class="info">
+        <p><strong>Testing Instructions:</strong></p>
+        <ol>
+            <li>Load this page with the Clean Web extension installed and active</li>
+            <li>All images and videos should be hidden immediately</li>
+            <li>Open the extension popup to see the count of hidden elements</li>
+            <li>Click "Add Dynamic Image" to test dynamic content hiding</li>
+            <li>Use the "Restore All (Debug)" button in the popup to temporarily show all images</li>
+        </ol>
+    </div>
+    
+    <script>
+        function addDynamicImage() {
+            const container = document.getElementById('dynamic-content');
+            const timestamp = Date.now();
+            
+            // Add a regular image
+            const img = document.createElement('img');
+            img.src = `https://via.placeholder.com/150x100/ff6600/ffffff?text=Dynamic+${timestamp}`;
+            img.alt = 'Dynamic Image';
+            
+            // Add a div with background image
+            const div = document.createElement('div');
+            div.style.width = '150px';
+            div.style.height = '100px';
+            div.style.backgroundImage = `url('https://via.placeholder.com/150x100/6600ff/ffffff?text=Dynamic+BG+${timestamp}')`;
+            div.style.backgroundSize = 'cover';
+            div.style.border = '2px solid #333';
+            div.style.margin = '10px 0';
+            
+            container.appendChild(img);
+            container.appendChild(div);
+            
+            console.log('Added dynamic content at', timestamp);
+        }
+    </script>
+</body>
+</html>
