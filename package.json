@@ -1,33 +1,43 @@
 {
   "name": "clean-web",
   "version": "1.0.0",
-  "description": "Goal is to block problematic images from rendering in html pages",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "description": "Block problematic images from rendering in web pages (Chrome extension and generic web infrastructure)",
+  "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "build:all": "tsc -p tests/tsconfig.json",
-    "dev": "tsc --watch",
-    "test": "npm run build:all && node --test dist/tests/*.test.js",
-    "start": "npm run build && node dist/index.js",
-    "clean": "rm -rf dist"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build:extension": "node build-extension.js",
+    "build:legacy": "node build.js",
+    "preview": "vite preview",
+    "clean": "rm -rf dist",
+    "lint": "echo \"No linting configured yet\"",
+    "test": "npm run build:extension && node validate-extension.js",
+    "validate": "node validate-extension.js"
   },
   "keywords": [
-    "image-classification",
-    "nsfw",
+    "image-filtering",
+    "content-blocker",
     "chrome-extension",
-    "typescript"
+    "web-safety"
   ],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "nsfwjs": "^2.4.2"
-  },
   "devDependencies": {
-    "@types/node": "^20.19.13",
-    "typescript": "^5.9.2"
+    "@types/chrome": "^0.1.6",
+    "@types/node": "^24.3.1",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.2",
+    "@vitejs/plugin-legacy": "^7.2.1",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.4",
+    "vite-plugin-static-copy": "^3.1.2"
   },
-  "engines": {
-    "node": ">=14.0.0"
+  "dependencies": {
+    "@tensorflow/tfjs": "^4.22.0",
+    "nsfwjs": "^4.2.1",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   }
 }
