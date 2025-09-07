@@ -19,8 +19,12 @@ src/
 │   ├── CleanWebControls.tsx # Control panel UI
 │   └── index.ts             # Component exports
 ├── extension/               # Chrome extension files
-│   ├── content.ts           # Content script
-│   └── manifest.json        # Extension manifest
+│   ├── content.ts           # Content script (TypeScript)
+│   ├── popup.ts             # Popup script (TypeScript)
+│   ├── popup.html           # Popup interface
+│   ├── content.css          # Extension styles
+│   ├── manifest.json        # Extension manifest
+│   └── icons/              # Extension icons
 ├── types/                   # TypeScript type definitions
 │   └── index.ts             # Shared types
 ├── utils/                   # Utility functions and helpers
@@ -32,48 +36,26 @@ src/
 
 - **Separated Business Logic**: All core functionality is isolated in the `business-logic` directory
 - **Vite Build System**: Modern, fast build tooling with TypeScript support
-- **Chrome Extension Ready**: Content script and manifest for browser extension
+- **Chrome Extension Ready**: Complete extension with TypeScript content and popup scripts
 - **Type Safety**: Full TypeScript implementation with proper type definitions
 - **Modular Architecture**: Clean separation of concerns across modules
+- **"Hide All Before Processing"**: Implements the core requirement from issue #6
+- **React + TypeScript**: Modern frontend stack for web application
+- **AI-Powered Filtering**: Advanced image classification capabilities
 
 ## Development Commands
 
+### Chrome Extension Development
+
 ```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Build extension
+# Build the extension for testing
 npm run build:extension
 
-# Preview production build
-npm run preview
+# Validate extension structure
+npm run validate
+
+# Run all tests (build + validate)
+npm test
 ```
 
-## Business Logic Separation
-
-The business logic is completely separated from the UI:
-
-1. **ImageClassifier**: Handles image analysis and nudity detection
-2. **ImageDetector**: Finds and monitors image elements in the DOM
-3. **ImageFilter**: Manages blocking/allowing of images based on analysis
-4. **CleanWebCore**: Main orchestrator that coordinates all components
-
-This architecture allows the same business logic to be used in:
-- Web applications (React UI)
-- Chrome extensions (content scripts)
-- Node.js environments (server-side processing)
-- Any other JavaScript environment
-
-## Getting Started
-
-1. Clone the repository
-2. Run `npm install` to install dependencies
-3. Run `npm run dev` to start the development server
-4. Open http://localhost:5173 to see the application
-5. Run `npm run build` to create production build
+The extension will automatically hide all images on page load using the `CleanWebCore.startWithImmediateHiding()` method.

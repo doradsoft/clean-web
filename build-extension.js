@@ -47,12 +47,41 @@ async function buildExtension() {
       }
     }
 
-    // 4. Create basic icons (placeholder)
-    console.log('🎨 Creating placeholder icons...');
-    const iconSizes = [16, 32, 48, 128];
-    for (const size of iconSizes) {
-      const iconContent = createPlaceholderIcon(size);
-      await fs.writeFile(resolve(outDir, `icon-${size}.png`), iconContent);
+    // 4. Copy CSS files
+    const cssFiles = ['content.css'];
+    for (const file of cssFiles) {
+      const srcPath = resolve(srcDir, file);
+      const destPath = resolve(outDir, file);
+      
+      try {
+        await fs.copyFile(srcPath, destPath);
+        console.log(`   ✅ Copied ${file}`);
+      } catch (error) {
+        console.warn(`   ⚠️  Could not copy ${file}:`, error.message);
+      }
+    }
+
+    // 5. Copy icon directory if it exists
+    try {
+      const iconsSrcDir = resolve(srcDir, 'icons');
+      const iconsDestDir = resolve(outDir, 'icons');
+      
+      // Check if icons directory exists
+      await fs.access(iconsSrcDir);
+      
+      // Copy entire icons directory
+      await fs.cp(iconsSrcDir, iconsDestDir, { recursive: true });
+      console.log('   ✅ Copied icons directory');
+    } catch (error) {
+      console.log('🎨 Creating placeholder icons...');
+      const iconSizes = [16, 32, 48, 128];
+      const iconsDir = resolve(outDir, 'icons');
+      await fs.mkdir(iconsDir, { recursive: true });
+      
+      for (const size of iconSizes) {
+        const iconContent = createPlaceholderIcon(size);
+        await fs.writeFile(resolve(iconsDir, `icon${size}.png`), iconContent);
+      }
     }
 
     console.log('✅ Extension build completed successfully!');
@@ -78,9 +107,9 @@ function createPlaceholderIcon(size) {
     </svg>
   `;
   
-  // For simplicity, we'll just create an empty file
-  // In a real implementation, you'd convert SVG to PNG or use actual PNG files
-  return Buffer.from(''); // Placeholder
+  // For now, just return the SVG as text
+  // In production, you'd convert SVG to PNG
+  return Buffer.from(svg, 'utf8');
 }
 
-buildExtension();
+buildExtension().catch(console.error);

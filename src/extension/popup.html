@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clean Web Settings & Stats</title>
+    <title>Clean Web - Hide All Before Processing</title>
     <style>
         body {
             width: 380px;
@@ -170,6 +170,7 @@
             background: rgba(0, 0, 0, 0.2);
             padding: 10px 20px;
             text-align: center;
+            font-size: 12px;
         }
 
         .loading {
@@ -182,7 +183,21 @@
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div id="root">
+        <!-- Fallback content while React loads -->
+        <div class="popup">
+            <div class="popup-header">
+                <h1>🛡️ Clean Web</h1>
+                <p>Hide All Before Processing</p>
+            </div>
+            <div class="popup-content">
+                <div class="loading">Loading settings...</div>
+            </div>
+            <div class="popup-footer">
+                All images hidden before processing for safe browsing
+            </div>
+        </div>
+    </div>
     <script src="popup.js"></script>
 </body>
 </html>

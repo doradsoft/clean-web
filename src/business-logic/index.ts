@@ -1,4 +1,4 @@
-export * from './ImageClassifier';
-export * from './ImageDetector';
-export * from './ImageFilter';
-export * from './CleanWebCore';
+export { ImageClassifier } from './ImageClassifier';
+export { ImageDetector } from './ImageDetector';
+export { ImageFilter } from './ImageFilter';
+export { CleanWebCore } from './CleanWebCore';

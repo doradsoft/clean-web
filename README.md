@@ -91,11 +91,13 @@ console.log(analysis);
 - **Real-time processing** of existing and dynamically added images
 
 ### Chrome Extension Capabilities
-- **Automatic image hiding** on page load
+- **"Hide all before processing" functionality** - immediately hides all images on page load
+- **Automatic image hiding** on page load for all img, video, and background images
 - **Background service worker** for extension lifecycle management
 - **React-based popup UI** for real-time settings adjustment
 - **Chrome storage integration** for settings persistence
 - **Manifest V3 compliance** with proper security permissions
+- **Dynamic content monitoring** - hides new images as they are added to the page
 
 ### Web Application
 - **Full React UI** with the same business logic as the extension
@@ -121,6 +123,19 @@ npm run preview            # Preview production build
 # Utilities
 npm run clean              # Clean build directories
 ```
+
+## Chrome Extension "Hide All Before Processing" Implementation
+
+The Chrome extension implements the specific "hide all before processing" functionality:
+
+✅ **Implemented Features:**
+- Immediately hides all `<img>` elements on page load
+- Hides all `<video>` elements 
+- Hides elements with CSS background images
+- Monitors for dynamically added content and hides new images
+- Provides popup interface to monitor hidden elements count
+- Debug functionality to restore all hidden images
+- Uses `CleanWebCore.startWithImmediateHiding()` method
 
 ## Business Logic Separation
 
@@ -148,10 +163,14 @@ The core image filtering logic is completely framework-agnostic and can be used 
 5. The extension will appear in your extensions list
 
 The extension will automatically:
-- Hide images on page load
+- Hide images on page load **before processing** (immediate hiding functionality)
 - Analyze images using real TensorFlow.js AI classification
 - Show/hide images based on your sensitivity settings
 - Provide a popup UI for adjusting settings in real-time
+
+## Testing
+
+Open `test-page.html` in your browser to test the image hiding functionality. The extension should immediately hide all images, videos, and background images on the page.
 
 ## Configuration
 
@@ -179,9 +198,15 @@ The extension will automatically:
 ## Implementation Details
 
 - **Real Machine Learning**: Actual TensorFlow.js and nsfwjs model integration, no mock implementations
-- **Master Branch Compatibility**: Full integration with existing master branch architecture and interfaces
+- **Master Branch Compatibility**: Full integration with existing master branch architecture and interfaces  
 - **Memory Management**: Proper TensorFlow tensor cleanup to prevent memory leaks
 - **TypeScript Architecture**: Full type safety with strongly typed interfaces and method signatures
 - **Modern Build System**: Vite + React + TypeScript configuration matching master structure
 - **Error Recovery**: Multiple fallback strategies ensure system reliability
 - **Configurable Thresholds**: Adjustable sensitivity settings for different use cases
+- **"Hide All Before Processing"**: Immediate image hiding on page load before any analysis
+- **Integration with external AI services**: OpenAI, Google Vision, etc. compatibility
+- **Local ML model support**: Offline processing capabilities
+- **Enhanced image classification**: Beyond nudity detection for comprehensive filtering
+- **Performance optimizations**: Optimized for large pages with many images
+- **Advanced filtering rules**: Complex exceptions and rule-based systems

@@ -3,33 +3,8 @@ import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 
 export default defineConfig(({ mode }) => {
-  const isExtension = mode === 'extension';
-  
-  return {
+  const baseConfig = {
     plugins: [react()],
-    build: {
-      rollupOptions: isExtension ? {
-        // Extension build configuration
-        input: {
-          content: resolve(__dirname, 'src/extension/content.ts'),
-          background: resolve(__dirname, 'src/extension/background.ts'),
-          popup: resolve(__dirname, 'src/extension/popup.tsx'),
-        },
-        output: {
-          entryFileNames: '[name].js',
-          chunkFileNames: 'chunks/[name]-[hash].js',
-          assetFileNames: '[name].[ext]',
-        },
-        external: [] // Don't externalize any modules for the extension
-      } : {
-        // Web app build configuration  
-        input: {
-          main: resolve(__dirname, 'index.html'),
-        },
-      },
-      outDir: isExtension ? 'dist/extension' : 'dist',
-      target: isExtension ? 'es2020' : undefined,
-    },
     resolve: {
       alias: {
         '@': resolve(__dirname, 'src'),
@@ -39,8 +14,37 @@ export default defineConfig(({ mode }) => {
         '@/types': resolve(__dirname, 'src/types'),
       },
     },
-    define: isExtension ? {
-      'process.env.NODE_ENV': JSON.stringify('production'),
-    } : {},
+  };
+
+  if (mode === 'extension') {
+    // Extension build configuration
+    return {
+      ...baseConfig,
+      build: {
+        outDir: 'dist-extension',
+        rollupOptions: {
+          input: {
+            content: resolve(__dirname, 'src/extension/content.ts'),
+            popup: resolve(__dirname, 'src/extension/popup.ts'),
+          },
+          output: {
+            entryFileNames: '[name].js',
+            chunkFileNames: '[name].js',
+            assetFileNames: '[name].[ext]'
+          }
+        },
+        sourcemap: false,
+      },
+    };
   }
-})
+  
+  // Default web app configuration
+  return {
+    ...baseConfig,
+    build: {
+      rollupOptions: {
+        input: resolve(__dirname, 'index.html'),
+      },
+    },
+  };
+});

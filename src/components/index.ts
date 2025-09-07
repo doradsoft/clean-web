@@ -1,2 +1,2 @@
-export * from './App';
-export * from './CleanWebControls';
+export { App } from './App';
+export { CleanWebControls } from './CleanWebControls';

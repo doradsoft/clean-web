@@ -37,6 +37,37 @@ export class CleanWebCore {
   }
 
   /**
+   * Starts with immediate hiding (for "hide all before processing")
+   */
+  async startWithImmediateHiding(): Promise<void> {
+    if (this.isRunning) {
+      return;
+    }
+
+    this.isRunning = true;
+
+    // Immediately hide all images first
+    this.filter.hideAllImages();
+
+    // Then process existing images
+    await this.processExistingImages();
+
+    // Start observing for new images
+    this.detector.startObserving(async (newImages) => {
+      // Hide new images immediately, then process them
+      newImages.forEach(img => {
+        this.filter.applyFilter(img, { 
+          nudityLevel: 10, 
+          isProblematic: true, 
+          confidence: 1, 
+          reasons: ['Hidden before processing'] 
+        });
+      });
+      await this.processImages(newImages);
+    });
+  }
+
+  /**
    * Stops the clean-web system
    */
   stop(): void {

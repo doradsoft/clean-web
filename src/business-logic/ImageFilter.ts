@@ -150,4 +150,49 @@ export class ImageFilter {
       totalProcessed: this.hiddenElements.size // This would be more comprehensive in a real implementation
     };
   }
+
+  /**
+   * Immediately hides all images (for "hide all before processing" functionality)
+   */
+  hideAllImages(): void {
+    const images = document.querySelectorAll('img');
+    const videos = document.querySelectorAll('video');
+    
+    // Hide all img elements
+    images.forEach(img => {
+      if (!this.hiddenElements.has(img)) {
+        const originalDisplay = img.style.display;
+        this.hiddenElements.set(img, originalDisplay);
+        img.style.display = 'none !important';
+        img.classList.add('clean-web-hidden');
+      }
+    });
+    
+    // Hide all video elements
+    videos.forEach(video => {
+      if (!this.hiddenElements.has(video)) {
+        const originalDisplay = video.style.display;
+        this.hiddenElements.set(video, originalDisplay);
+        video.style.display = 'none !important';
+        video.classList.add('clean-web-hidden');
+      }
+    });
+    
+    // Hide elements with background images
+    const allElements = document.querySelectorAll('*');
+    allElements.forEach(element => {
+      const computedStyle = window.getComputedStyle(element);
+      const backgroundImage = computedStyle.backgroundImage;
+      
+      if (backgroundImage && backgroundImage !== 'none') {
+        const htmlElement = element as HTMLElement;
+        if (!this.hiddenElements.has(htmlElement)) {
+          const originalDisplay = htmlElement.style.display;
+          this.hiddenElements.set(htmlElement, originalDisplay);
+          htmlElement.style.display = 'none !important';
+          htmlElement.classList.add('clean-web-hidden');
+        }
+      }
+    });
+  }
 }

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Clean Web",
   "version": "1.0.0",
-  "description": "Block problematic images using comprehensive mutation observer and AI-powered analysis",
+  "description": "Block problematic images using real AI-powered content analysis with hide-all-before-processing functionality",
   
   "permissions": [
     "storage",
@@ -23,13 +23,14 @@
     {
       "matches": ["http://*/*", "https://*/*"],
       "js": ["content.js"],
+      "css": ["content.css"],
       "run_at": "document_start"
     }
   ],
   
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Clean Web - Settings & Stats",
+    "default_title": "Clean Web - Hide All Before Processing",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
