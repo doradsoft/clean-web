@@ -19,7 +19,7 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 
 // Message handler for communication with content scripts and popup
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   console.log('Background received message:', message);
   
   switch (message.type) {
@@ -57,7 +57,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 // Tab update handler to reinject content script if needed
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url) {
     // Only inject on http/https pages
     if (tab.url.startsWith('http://') || tab.url.startsWith('https://')) {

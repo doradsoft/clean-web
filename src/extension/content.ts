@@ -48,8 +48,8 @@ class CleanWebExtension {
       
       // Fallback: try basic processing if immediate hiding fails
       try {
-        await this.core.processPage();
-        console.log('[Clean Web] Fallback mode: processing page without immediate hiding');
+        await this.core.start();
+        console.log('[Clean Web] Fallback mode: started basic processing');
       } catch (fallbackError) {
         console.error('[Clean Web] Fallback also failed:', fallbackError);
       }
