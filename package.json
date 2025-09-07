@@ -1,0 +1,36 @@
+{
+  "name": "clean-web",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Block problematic images from rendering in web pages (Chrome extension and generic web infrastructure)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build:extension": "tsc && vite build --mode extension && cp src/extension/manifest.json extension/ && cp src/extension/popup.html extension/",
+    "preview": "vite preview",
+    "lint": "echo \"No linting configured yet\"",
+    "test": "echo \"No tests configured yet\""
+  },
+  "keywords": [
+    "image-filtering",
+    "content-blocker",
+    "chrome-extension",
+    "web-safety"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chrome": "^0.1.6",
+    "@types/node": "^24.3.1",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.2",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.4"
+  },
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  }
+}

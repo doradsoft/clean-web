@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean Web Extension Test Page (Standalone)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .test-image {
+            width: 200px;
+            height: 150px;
+            margin: 10px;
+            display: inline-block;
+        }
+        
+        .bg-image-1 {
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iIzc0ODZmZiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSI+QkcgSW1hZ2UgMTwvdGV4dD48L3N2Zz4=');
+            background-size: cover;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .bg-image-2 {
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iIzRjYWY1MCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSI+QkcgSW1hZ2UgMjwvdGV4dD48L3N2Zz4=');
+            background-size: cover;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .bg-image-3 {
+            background: linear-gradient(45deg, #ff6b6b, #ffa726);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .dynamic-content {
+            min-height: 100px;
+            border: 2px dashed #ccc;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .stats-box {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            min-width: 200px;
+        }
+        
+        .stats-box h3 {
+            margin: 0 0 10px 0;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="stats-box">
+        <h3>Detection Stats</h3>
+        <div>Total Images: <strong id="total-count">0</strong></div>
+        <div>IMG Elements: <strong id="img-count">0</strong></div>
+        <div>Background Images: <strong id="bg-count">0</strong></div>
+        <button onclick="location.reload()">Refresh</button>
+    </div>
+
+    <h1>Clean Web Extension Test Page (Standalone)</h1>
+    <p>This page tests the mutation observer functionality with inline data URLs to avoid external blocking.</p>
+
+    <div class="section">
+        <h2>1. Static IMG Elements</h2>
+        <p>These images should be detected on page load:</p>
+        
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iIzc0ODZmZiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSI+VGVzdCBJbWFnZSAxPC90ZXh0Pjwvc3ZnPg==" 
+             alt="Test Image 1" class="test-image">
+        
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iIzRjYWY1MCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSI+VGVzdCBJbWFnZSAyPC90ZXh0Pjwvc3ZnPg==" 
+             alt="Test Image 2" class="test-image">
+        
+        <img data-lazy-src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2ZmNjk5NCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSI+TGF6eSBsb2FkZWQgaW1hZ2U8L3RleHQ+PC9zdmc+" 
+             alt="Lazy loaded image" class="test-image" id="lazy-img">
+    </div>
+
+    <div class="section">
+        <h2>2. Background Images (CSS)</h2>
+        <p>These background images should be detected:</p>
+        
+        <div class="test-image bg-image-1"></div>
+        <div class="test-image bg-image-2"></div>
+        <div class="test-image bg-image-3">Inline BG</div>
+    </div>
+
+    <div class="section">
+        <h2>3. Dynamic Content</h2>
+        <p>Use these buttons to test the mutation observer:</p>
+        
+        <button onclick="addImgElement()">Add IMG Element</button>
+        <button onclick="addBackgroundImage()">Add Background Image</button>
+        <button onclick="changeImageSource()">Change Image Source</button>
+        <button onclick="addComplexContent()">Add Complex Content</button>
+        
+        <div id="dynamic-content" class="dynamic-content">
+            Dynamic content will appear here...
+        </div>
+    </div>
+
+    <script>
+        let imageCounter = 0;
+
+        // Initialize lazy loaded image after a delay
+        setTimeout(() => {
+            const lazyImg = document.getElementById('lazy-img');
+            if (lazyImg) {
+                lazyImg.src = lazyImg.dataset.lazySrc;
+            }
+        }, 2000);
+
+        function addImgElement() {
+            imageCounter++;
+            const img = document.createElement('img');
+            img.src = `data:image/svg+xml;base64,${btoa(`<svg width="150" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="150" height="100" fill="#333"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white">Dynamic ${imageCounter}</text></svg>`)}`;
+            img.alt = `Dynamic image ${imageCounter}`;
+            img.style.cssText = 'width: 150px; height: 100px; margin: 10px; border: 2px solid red;';
+            document.getElementById('dynamic-content').appendChild(img);
+        }
+
+        function addBackgroundImage() {
+            imageCounter++;
+            const div = document.createElement('div');
+            div.style.cssText = `
+                width: 150px; 
+                height: 100px; 
+                margin: 10px; 
+                display: inline-block;
+                background-image: url('data:image/svg+xml;base64,${btoa(`<svg width="150" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="150" height="100" fill="#ff9800"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white">Dynamic BG ${imageCounter}</text></svg>`)}');
+                background-size: cover;
+                border: 2px solid red;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            document.getElementById('dynamic-content').appendChild(div);
+        }
+
+        function changeImageSource() {
+            const images = document.querySelectorAll('#dynamic-content img');
+            if (images.length > 0) {
+                const img = images[images.length - 1];
+                imageCounter++;
+                img.src = `data:image/svg+xml;base64,${btoa(`<svg width="150" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="150" height="100" fill="#e91e63"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white">Updated ${imageCounter}</text></svg>`)}`;
+            }
+        }
+
+        function addComplexContent() {
+            imageCounter++;
+            const container = document.createElement('div');
+            container.style.cssText = 'border: 1px solid #ccc; padding: 10px; margin: 10px; display: inline-block;';
+            
+            container.innerHTML = `
+                <h4>Complex Content ${imageCounter}</h4>
+                <img src="data:image/svg+xml;base64,${btoa(`<svg width="100" height="80" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="80" fill="#9c27b0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white">Nested</text></svg>`)}" style="width: 100px; height: 80px;">
+                <div style="width: 100px; height: 80px; background-image: url('data:image/svg+xml;base64,${btoa(`<svg width="100" height="80" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="80" fill="#607d8b"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white">BG</text></svg>`)}'); background-size: cover; display: inline-block; margin-left: 10px;"></div>
+            `;
+            
+            document.getElementById('dynamic-content').appendChild(container);
+        }
+
+        // Update stats display periodically
+        function updateStatsDisplay() {
+            if (window.cleanWebExtension) {
+                const stats = window.cleanWebExtension.getStats();
+                document.getElementById('total-count').textContent = stats.totalImages;
+                document.getElementById('img-count').textContent = stats.imgElements;
+                document.getElementById('bg-count').textContent = stats.backgroundImages;
+            }
+        }
+
+        setInterval(updateStatsDisplay, 1000);
+        
+        console.log('Test page loaded. Clean Web extension should detect images automatically.');
+        console.log('Check the extension popup for real-time statistics.');
+    </script>
+</body>
+</html>
