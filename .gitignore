@@ -28,5 +28,18 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Node modules (if added later)
+# Dependencies
 node_modules/
+package-lock.json
+
+# Build outputs
+dist/
+dist-extension/
+
+# Old extension files (now in src/extension/)
+manifest.json
+content.js
+content.css
+popup.html
+popup.js
+icon*.png
