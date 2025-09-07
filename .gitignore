@@ -29,6 +29,7 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+*.log
 
 # Chrome extension build files
 extension/
