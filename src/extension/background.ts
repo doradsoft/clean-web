@@ -1,0 +1,67 @@
+/**
+ * Background service worker for the Clean Web Chrome extension
+ * Handles extension lifecycle and cross-tab communication
+ */
+
+// Installation and update handler
+chrome.runtime.onInstalled.addListener((details) => {
+  console.log('Clean Web extension installed/updated:', details.reason);
+  
+  if (details.reason === 'install') {
+    // Set default settings on first install
+    chrome.storage.sync.set({
+      nudityThreshold: 5,
+      strictMode: false,
+      allowList: [],
+      blockList: []
+    });
+  }
+});
+
+// Message handler for communication with content scripts and popup
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('Background received message:', message);
+  
+  switch (message.type) {
+    case 'GET_SETTINGS':
+      chrome.storage.sync.get({
+        nudityThreshold: 5,
+        strictMode: false,
+        allowList: [],
+        blockList: []
+      }, sendResponse);
+      return true; // Will respond asynchronously
+      
+    case 'UPDATE_SETTINGS':
+      chrome.storage.sync.set(message.settings, () => {
+        sendResponse({ success: true });
+      });
+      return true; // Will respond asynchronously
+      
+    case 'RELOAD_CONTENT_SCRIPTS':
+      // Reload all tabs with content scripts
+      chrome.tabs.query({}, (tabs) => {
+        tabs.forEach((tab) => {
+          if (tab.id) {
+            chrome.tabs.reload(tab.id);
+          }
+        });
+      });
+      sendResponse({ success: true });
+      break;
+      
+    default:
+      console.warn('Unknown message type:', message.type);
+      sendResponse({ error: 'Unknown message type' });
+  }
+});
+
+// Tab update handler to reinject content script if needed
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete' && tab.url) {
+    // Only inject on http/https pages
+    if (tab.url.startsWith('http://') || tab.url.startsWith('https://')) {
+      console.log('Page loaded, content script should be active on:', tab.url);
+    }
+  }
+});

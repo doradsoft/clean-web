@@ -1,0 +1,142 @@
+import React, { useState, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
+
+interface Settings {
+  nudityThreshold: number;
+  strictMode: boolean;
+  allowList: string[];
+  blockList: string[];
+}
+
+const Popup: React.FC = () => {
+  const [settings, setSettings] = useState<Settings>({
+    nudityThreshold: 5,
+    strictMode: false,
+    allowList: [],
+    blockList: []
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Load current settings
+    chrome.runtime.sendMessage({ type: 'GET_SETTINGS' }, (response) => {
+      if (response) {
+        setSettings(response);
+      }
+      setLoading(false);
+    });
+  }, []);
+
+  const updateSettings = (newSettings: Partial<Settings>) => {
+    const updatedSettings = { ...settings, ...newSettings };
+    setSettings(updatedSettings);
+    
+    chrome.runtime.sendMessage({
+      type: 'UPDATE_SETTINGS',
+      settings: updatedSettings
+    }, (response) => {
+      if (response?.success) {
+        console.log('Settings updated successfully');
+      }
+    });
+  };
+
+  const reloadContentScripts = () => {
+    chrome.runtime.sendMessage({ type: 'RELOAD_CONTENT_SCRIPTS' }, (response) => {
+      if (response?.success) {
+        window.close(); // Close popup after reload
+      }
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="popup">
+        <div className="loading">Loading settings...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="popup">
+      <header className="popup-header">
+        <h1>Clean Web</h1>
+        <p>AI-Powered Image Content Filter</p>
+      </header>
+
+      <main className="popup-content">
+        <div className="setting-group">
+          <label htmlFor="threshold">
+            Sensitivity Level: {settings.nudityThreshold}
+          </label>
+          <input
+            id="threshold"
+            type="range"
+            min="0"
+            max="10"
+            value={settings.nudityThreshold}
+            onChange={(e) => updateSettings({ nudityThreshold: parseInt(e.target.value) })}
+          />
+          <div className="threshold-labels">
+            <span>Permissive (0)</span>
+            <span>Strict (10)</span>
+          </div>
+        </div>
+
+        <div className="setting-group">
+          <label>
+            <input
+              type="checkbox"
+              checked={settings.strictMode}
+              onChange={(e) => updateSettings({ strictMode: e.target.checked })}
+            />
+            Enhanced filtering (Strict Mode)
+          </label>
+        </div>
+
+        <div className="setting-group">
+          <label htmlFor="allowList">Always Allow (domains):</label>
+          <textarea
+            id="allowList"
+            value={settings.allowList.join('\n')}
+            onChange={(e) => updateSettings({ 
+              allowList: e.target.value.split('\n').filter(s => s.trim()) 
+            })}
+            placeholder="example.com&#10;trusted-site.org"
+            rows={3}
+          />
+        </div>
+
+        <div className="setting-group">
+          <label htmlFor="blockList">Always Block (domains):</label>
+          <textarea
+            id="blockList"
+            value={settings.blockList.join('\n')}
+            onChange={(e) => updateSettings({ 
+              blockList: e.target.value.split('\n').filter(s => s.trim()) 
+            })}
+            placeholder="blocked-site.com&#10;suspicious-domain.net"
+            rows={3}
+          />
+        </div>
+
+        <div className="actions">
+          <button onClick={reloadContentScripts} className="reload-btn">
+            Apply & Reload Pages
+          </button>
+        </div>
+      </main>
+
+      <footer className="popup-footer">
+        <small>Real TensorFlow.js ML Classification</small>
+      </footer>
+    </div>
+  );
+};
+
+// Initialize React app
+const container = document.getElementById('root');
+if (container) {
+  const root = createRoot(container);
+  root.render(<Popup />);
+}
