@@ -7,13 +7,13 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build:extension": "vite build --mode extension",
+    "build:extension": "node build-extension.js",
     "build:legacy": "node build.js",
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "echo \"No linting configured yet\"",
-    "test": "npm run build && echo \"Tests would run here\"",
-    "validate": "echo \"Validation would run here\""
+    "test": "npm run build:extension && node validate-extension.js",
+    "validate": "node validate-extension.js"
   },
   "keywords": [
     "image-filtering",
