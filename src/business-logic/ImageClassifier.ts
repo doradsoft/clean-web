@@ -1,8 +1,8 @@
 import { ImageAnalysis } from '@/types';
 
 /**
- * Business logic for analyzing and classifying images
- * Determines whether images contain problematic content
+ * Core business logic for image analysis and classification
+ * This module handles the classification of images for nudity/inappropriate content
  */
 export class ImageClassifier {
   private strictMode: boolean;
@@ -14,63 +14,62 @@ export class ImageClassifier {
   }
 
   /**
-   * Analyzes an image URL to determine if it's problematic
-   * Note: This is a placeholder implementation for the architecture demonstration
+   * Analyzes an image and returns classification results
+   * This is a placeholder implementation - in a real scenario, this would
+   * use ML models or external APIs for image analysis
    */
-  async analyzeImage(imageUrl: string): Promise<ImageAnalysis> {
-    // Placeholder implementation - in a real system this would:
+  async analyzeImage(imageSrc: string): Promise<ImageAnalysis> {
+    // Placeholder implementation
+    // In a real implementation, this would:
     // 1. Fetch the image
-    // 2. Run ML analysis for nudity/problematic content
-    // 3. Return detailed analysis results
+    // 2. Process it through ML models
+    // 3. Return actual analysis results
     
-    // For now, return a mock analysis based on URL patterns
-    const mockAnalysis: ImageAnalysis = {
+    const analysis: ImageAnalysis = {
       nudityLevel: 0,
       isProblematic: false,
-      confidence: 0.8,
+      confidence: 0.5,
       reasons: []
     };
 
-    // Simple URL-based heuristics for demonstration
-    const url = imageUrl.toLowerCase();
-    if (url.includes('nsfw') || url.includes('adult') || url.includes('explicit')) {
-      mockAnalysis.nudityLevel = 9;
-      mockAnalysis.isProblematic = true;
-      mockAnalysis.reasons.push('URL contains explicit keywords');
-    } else if (url.includes('bikini') || url.includes('swimwear')) {
-      mockAnalysis.nudityLevel = 4;
-      mockAnalysis.isProblematic = this.strictMode;
-      mockAnalysis.reasons.push('URL suggests swimwear content');
+    // Simplified heuristic analysis based on URL patterns
+    const suspiciousPatterns = [
+      /adult/i,
+      /nude/i,
+      /nsfw/i,
+      /explicit/i,
+      /porn/i
+    ];
+
+    const foundPatterns = suspiciousPatterns.filter(pattern => pattern.test(imageSrc));
+    
+    if (foundPatterns.length > 0) {
+      analysis.nudityLevel = Math.min(10, foundPatterns.length * 3);
+      analysis.confidence = 0.7;
+      analysis.reasons = ['Suspicious URL pattern detected'];
     }
 
-    return mockAnalysis;
+    // Apply strict mode adjustments
+    if (this.strictMode) {
+      analysis.nudityLevel = Math.min(10, analysis.nudityLevel + 2);
+    }
+
+    analysis.isProblematic = analysis.nudityLevel >= this.nudityThreshold;
+
+    return analysis;
   }
 
   /**
-   * Updates strict mode setting
-   */
-  setStrictMode(strictMode: boolean): void {
-    this.strictMode = strictMode;
-  }
-
-  /**
-   * Updates nudity threshold
+   * Updates the nudity threshold
    */
   setNudityThreshold(threshold: number): void {
-    this.nudityThreshold = threshold;
+    this.nudityThreshold = Math.max(0, Math.min(10, threshold));
   }
 
   /**
-   * Gets current strict mode setting
+   * Toggles strict mode
    */
-  getStrictMode(): boolean {
-    return this.strictMode;
-  }
-
-  /**
-   * Gets current nudity threshold
-   */
-  getNudityThreshold(): number {
-    return this.nudityThreshold;
+  setStrictMode(enabled: boolean): void {
+    this.strictMode = enabled;
   }
 }

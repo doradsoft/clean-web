@@ -3,16 +3,10 @@ import { ImageElement } from '@/types';
 /**
  * Business logic for detecting and managing image elements in the DOM
  * Responsible for finding all image elements that need to be processed
- * Enhanced with comprehensive mutation observer capabilities
  */
 export class ImageDetector {
   private observer: MutationObserver | null = null;
   private detectedElements: Set<HTMLElement> = new Set();
-  private stats = {
-    totalImages: 0,
-    backgroundImages: 0,
-    imgElements: 0
-  };
 
   /**
    * Extract src from img elements, including lazy loading attributes
@@ -38,51 +32,12 @@ export class ImageDetector {
     const backgroundImage = computedStyle.backgroundImage;
     
     if (backgroundImage && backgroundImage !== 'none') {
-      // Extract URL from css url() function
-      const matches = backgroundImage.match(/url\(['"]?([^'"]+)['"]?\)/);
-      if (matches && matches[1]) {
-        return matches[1];
+      const urlMatch = backgroundImage.match(/url\(['"]?(.*?)['"]?\)/);
+      if (urlMatch && urlMatch[1]) {
+        return urlMatch[1];
       }
     }
     return null;
-  }
-
-  /**
-   * Process a single element for image detection
-   */
-  private processElement(element: HTMLElement): ImageElement[] {
-    const images: ImageElement[] = [];
-    
-    // Check if element is an IMG
-    if (element.tagName === 'IMG') {
-      const img = element as HTMLImageElement;
-      const imageUrl = this.extractImageSrc(img);
-      if (imageUrl && !this.detectedElements.has(element)) {
-        images.push({
-          element: element,
-          src: imageUrl,
-          type: 'img'
-        });
-        this.detectedElements.add(element);
-        this.stats.imgElements++;
-        this.stats.totalImages++;
-      }
-    }
-
-    // Check for background images on any element
-    const bgImageUrl = this.extractBackgroundImage(element);
-    if (bgImageUrl && !this.detectedElements.has(element)) {
-      images.push({
-        element: element,
-        src: bgImageUrl,
-        type: 'background'
-      });
-      this.detectedElements.add(element);
-      this.stats.backgroundImages++;
-      this.stats.totalImages++;
-    }
-
-    return images;
   }
 
   /**
@@ -91,7 +46,7 @@ export class ImageDetector {
   detectImages(): ImageElement[] {
     const images: ImageElement[] = [];
     
-    // Find img elements
+    // Find img elements with lazy loading support
     const imgElements = document.querySelectorAll('img');
     imgElements.forEach(img => {
       const imageUrl = this.extractImageSrc(img);
@@ -101,42 +56,34 @@ export class ImageDetector {
           src: imageUrl,
           type: 'img'
         });
-        this.detectedElements.add(img);
-        this.stats.imgElements++;
       }
     });
 
     // Find elements with background images
     const allElements = document.querySelectorAll('*');
     allElements.forEach(element => {
-      const htmlElement = element as HTMLElement;
-      const bgImageUrl = this.extractBackgroundImage(htmlElement);
-      if (bgImageUrl && !this.detectedElements.has(htmlElement)) {
+      const backgroundImageUrl = this.extractBackgroundImage(element as HTMLElement);
+      if (backgroundImageUrl) {
         images.push({
-          element: htmlElement,
-          src: bgImageUrl,
+          element: element as HTMLElement,
+          src: backgroundImageUrl,
           type: 'background'
         });
-        this.detectedElements.add(htmlElement);
-        this.stats.backgroundImages++;
       }
     });
 
-    // Find video elements with poster images
+    // Find video elements
     const videoElements = document.querySelectorAll('video');
     videoElements.forEach(video => {
-      const videoElement = video as HTMLVideoElement;
-      if (videoElement.poster) {
+      if (video.poster) {
         images.push({
-          element: videoElement,
-          src: videoElement.poster,
+          element: video,
+          src: video.poster,
           type: 'video'
         });
-        this.detectedElements.add(videoElement);
       }
     });
 
-    this.stats.totalImages = images.length;
     return images;
   }
 
@@ -150,6 +97,7 @@ export class ImageDetector {
     }
 
     this.observer = new MutationObserver((mutations) => {
+      let hasNewImages = false;
       const newImages: ImageElement[] = [];
 
       mutations.forEach((mutation) => {
@@ -159,15 +107,89 @@ export class ImageDetector {
             if (node.nodeType === Node.ELEMENT_NODE) {
               const element = node as HTMLElement;
               
-              // Process the element itself
-              const elementImages = this.processElement(element);
-              newImages.push(...elementImages);
+              // Check if the added node itself is an image
+              if (element.tagName === 'IMG') {
+                const img = element as HTMLImageElement;
+                const imageUrl = this.extractImageSrc(img);
+                if (imageUrl && !this.detectedElements.has(img)) {
+                  newImages.push({
+                    element: img,
+                    src: imageUrl,
+                    type: 'img'
+                  });
+                  this.detectedElements.add(img);
+                  hasNewImages = true;
+                }
+              }
 
-              // Process child elements
-              const childImages = element.querySelectorAll('img, *');
-              childImages.forEach(childElement => {
-                const childImages = this.processElement(childElement as HTMLElement);
-                newImages.push(...childImages);
+              // Check for video poster
+              if (element.tagName === 'VIDEO') {
+                const video = element as HTMLVideoElement;
+                if (video.poster && !this.detectedElements.has(video)) {
+                  newImages.push({
+                    element: video,
+                    src: video.poster,
+                    type: 'video'
+                  });
+                  this.detectedElements.add(video);
+                  hasNewImages = true;
+                }
+              }
+
+              // Check for background images
+              const backgroundImageUrl = this.extractBackgroundImage(element);
+              if (backgroundImageUrl && !this.detectedElements.has(element)) {
+                newImages.push({
+                  element: element,
+                  src: backgroundImageUrl,
+                  type: 'background'
+                });
+                this.detectedElements.add(element);
+                hasNewImages = true;
+              }
+
+              // Check for images within the added node
+              const childImages = element.querySelectorAll('img');
+              childImages.forEach(img => {
+                const imageUrl = this.extractImageSrc(img);
+                if (imageUrl && !this.detectedElements.has(img)) {
+                  newImages.push({
+                    element: img,
+                    src: imageUrl,
+                    type: 'img'
+                  });
+                  this.detectedElements.add(img);
+                  hasNewImages = true;
+                }
+              });
+
+              // Check for video posters within the added node
+              const childVideos = element.querySelectorAll('video');
+              childVideos.forEach(video => {
+                if (video.poster && !this.detectedElements.has(video)) {
+                  newImages.push({
+                    element: video,
+                    src: video.poster,
+                    type: 'video'
+                  });
+                  this.detectedElements.add(video);
+                  hasNewImages = true;
+                }
+              });
+
+              // Check for background images in child elements
+              const allChildElements = element.querySelectorAll('*');
+              allChildElements.forEach(childElement => {
+                const childBgUrl = this.extractBackgroundImage(childElement as HTMLElement);
+                if (childBgUrl && !this.detectedElements.has(childElement as HTMLElement)) {
+                  newImages.push({
+                    element: childElement as HTMLElement,
+                    src: childBgUrl,
+                    type: 'background'
+                  });
+                  this.detectedElements.add(childElement as HTMLElement);
+                  hasNewImages = true;
+                }
               });
             }
           });
@@ -178,25 +200,63 @@ export class ImageDetector {
               mutation.attributeName === 'data-src' ||
               mutation.attributeName === 'data-lazy-src' ||
               mutation.attributeName === 'style' ||
-              mutation.attributeName === 'class') {
+              mutation.attributeName === 'class' ||
+              mutation.attributeName === 'poster') {
             
-            const elementImages = this.processElement(element);
-            newImages.push(...elementImages);
+            // Re-check this element for images
+            if (element.tagName === 'IMG') {
+              const img = element as HTMLImageElement;
+              const imageUrl = this.extractImageSrc(img);
+              if (imageUrl && !this.detectedElements.has(img)) {
+                newImages.push({
+                  element: img,
+                  src: imageUrl,
+                  type: 'img'
+                });
+                this.detectedElements.add(img);
+                hasNewImages = true;
+              }
+            }
+
+            if (element.tagName === 'VIDEO') {
+              const video = element as HTMLVideoElement;
+              if (video.poster && !this.detectedElements.has(video)) {
+                newImages.push({
+                  element: video,
+                  src: video.poster,
+                  type: 'video'
+                });
+                this.detectedElements.add(video);
+                hasNewImages = true;
+              }
+            }
+
+            // Check for background image changes
+            const backgroundImageUrl = this.extractBackgroundImage(element);
+            if (backgroundImageUrl && !this.detectedElements.has(element)) {
+              newImages.push({
+                element: element,
+                src: backgroundImageUrl,
+                type: 'background'
+              });
+              this.detectedElements.add(element);
+              hasNewImages = true;
+            }
           }
         }
       });
 
-      if (newImages.length > 0) {
-        console.log(`ImageDetector: Found ${newImages.length} new images`);
+      if (hasNewImages) {
         onNewImages(newImages);
       }
     });
 
+    // Observe with comprehensive options
     this.observer.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ['src', 'data-src', 'data-lazy-src', 'style', 'class']
+      attributeFilter: ['src', 'data-src', 'data-lazy-src', 'style', 'class', 'poster']
     });
   }
 
@@ -215,27 +275,5 @@ export class ImageDetector {
    */
   clearCache(): void {
     this.detectedElements.clear();
-    this.stats = {
-      totalImages: 0,
-      backgroundImages: 0,
-      imgElements: 0
-    };
-  }
-
-  /**
-   * Get detection statistics
-   */
-  getStats() {
-    return { ...this.stats };
-  }
-
-  /**
-   * Add visual indicator to detected images (for debugging)
-   */
-  addVisualIndicators(): void {
-    this.detectedElements.forEach(element => {
-      element.style.border = '2px solid red';
-      element.style.boxSizing = 'border-box';
-    });
   }
 }

@@ -1,205 +1,153 @@
-import { ImageAnalysis, ImageElement, FilterSettings } from '@/types';
+import { ImageElement, FilterSettings, ImageAnalysis } from '@/types';
 
 /**
- * Business logic for filtering and blocking image elements
- * Applies blocking/filtering actions based on image analysis results
+ * Business logic for filtering and blocking/allowing images
+ * Manages the actual hiding/showing of image elements
  */
 export class ImageFilter {
   private settings: FilterSettings;
-  private filteredElements: Set<HTMLElement> = new Set();
-  private stats = {
-    totalProcessed: 0,
-    totalBlocked: 0,
-    totalAllowed: 0
-  };
+  private hiddenElements: Map<HTMLElement, string> = new Map();
 
   constructor(settings: FilterSettings) {
-    this.settings = { ...settings };
+    this.settings = settings;
   }
 
   /**
-   * Apply filter to an image element based on analysis
+   * Applies filter to an image element based on analysis results
    */
   applyFilter(imageElement: ImageElement, analysis: ImageAnalysis): void {
-    this.stats.totalProcessed++;
+    if (this.shouldBlock(imageElement, analysis)) {
+      this.hideImage(imageElement);
+    } else {
+      this.showImage(imageElement);
+    }
+  }
 
-    // Check allow/block lists first
+  /**
+   * Determines if an image should be blocked
+   */
+  private shouldBlock(imageElement: ImageElement, analysis: ImageAnalysis): boolean {
+    // Check allow list first
     if (this.isInAllowList(imageElement.src)) {
-      this.allowImage(imageElement);
-      return;
+      return false;
     }
 
+    // Check block list
     if (this.isInBlockList(imageElement.src)) {
-      this.blockImage(imageElement);
-      return;
+      return true;
     }
 
     // Apply analysis-based filtering
-    if (analysis.isProblematic || analysis.nudityLevel > this.settings.nudityThreshold) {
-      this.blockImage(imageElement);
-    } else {
-      this.allowImage(imageElement);
-    }
+    return analysis.isProblematic;
   }
 
   /**
-   * Block an image element
+   * Checks if URL is in allow list
    */
-  private blockImage(imageElement: ImageElement): void {
-    const element = imageElement.element;
-    
-    if (this.filteredElements.has(element)) {
-      return; // Already processed
-    }
-
-    this.filteredElements.add(element);
-    this.stats.totalBlocked++;
-
-    // Apply blocking based on image type
-    switch (imageElement.type) {
-      case 'img':
-        this.blockImgElement(element as HTMLImageElement);
-        break;
-      case 'background':
-        this.blockBackgroundImage(element);
-        break;
-      case 'video':
-        this.blockVideoElement(element as HTMLVideoElement);
-        break;
-    }
-
-    console.log(`ImageFilter: Blocked ${imageElement.type} image: ${imageElement.src}`);
+  private isInAllowList(src: string): boolean {
+    return this.settings.allowList.some(pattern => {
+      try {
+        return new RegExp(pattern, 'i').test(src);
+      } catch {
+        return src.includes(pattern);
+      }
+    });
   }
 
   /**
-   * Allow an image element (remove any previous blocking)
+   * Checks if URL is in block list
    */
-  private allowImage(_imageElement: ImageElement): void {
-    this.stats.totalAllowed++;
-    // For now, we don't need to do anything special for allowed images
-    // In the future, this could remove blocking if settings change
+  private isInBlockList(src: string): boolean {
+    return this.settings.blockList.some(pattern => {
+      try {
+        return new RegExp(pattern, 'i').test(src);
+      } catch {
+        return src.includes(pattern);
+      }
+    });
   }
 
   /**
-   * Block IMG element
+   * Hides an image element
    */
-  private blockImgElement(img: HTMLImageElement): void {
-    img.style.display = 'none';
+  private hideImage(imageElement: ImageElement): void {
+    const { element } = imageElement;
     
-    // Optionally replace with placeholder
-    const placeholder = document.createElement('div');
-    placeholder.className = 'clean-web-blocked-image';
-    placeholder.textContent = '🚫 Image blocked by Clean Web';
-    placeholder.style.cssText = `
-      display: inline-block;
-      background: #f0f0f0;
-      border: 2px dashed #ccc;
-      padding: 20px;
-      text-align: center;
-      color: #666;
-      font-family: Arial, sans-serif;
-      font-size: 14px;
-    `;
-    
-    img.parentNode?.insertBefore(placeholder, img);
-  }
-
-  /**
-   * Block background image
-   */
-  private blockBackgroundImage(element: HTMLElement): void {
-    element.style.backgroundImage = 'none';
-    element.style.backgroundColor = '#f0f0f0';
-    
-    // Add blocked indicator if element is large enough
-    const rect = element.getBoundingClientRect();
-    if (rect.width > 50 && rect.height > 50) {
-      const indicator = document.createElement('div');
-      indicator.textContent = '🚫';
-      indicator.style.cssText = `
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 24px;
-        z-index: 1000;
-      `;
+    if (!this.hiddenElements.has(element)) {
+      // Store original display value
+      const originalDisplay = element.style.display;
+      this.hiddenElements.set(element, originalDisplay);
       
-      // Make sure parent is positioned
-      if (getComputedStyle(element).position === 'static') {
-        element.style.position = 'relative';
+      // Hide the element
+      element.style.display = 'none';
+      
+      // Add a class for styling if needed
+      element.classList.add('clean-web-hidden');
+      
+      // For background images, we might want to remove the background-image property
+      if (imageElement.type === 'background') {
+        element.style.backgroundImage = 'none';
+      }
+    }
+  }
+
+  /**
+   * Shows a previously hidden image element
+   */
+  private showImage(imageElement: ImageElement): void {
+    const { element } = imageElement;
+    
+    if (this.hiddenElements.has(element)) {
+      // Restore original display value
+      const originalDisplay = this.hiddenElements.get(element) || '';
+      element.style.display = originalDisplay;
+      
+      // Remove the hidden class
+      element.classList.remove('clean-web-hidden');
+      
+      // For background images, restore the original background
+      if (imageElement.type === 'background') {
+        // Note: In a real implementation, we'd need to store the original background-image
+        // For now, we'll just remove the override
+        element.style.backgroundImage = '';
       }
       
-      element.appendChild(indicator);
+      this.hiddenElements.delete(element);
     }
   }
 
   /**
-   * Block video poster
-   */
-  private blockVideoElement(video: HTMLVideoElement): void {
-    video.poster = '';
-  }
-
-  /**
-   * Check if URL is in allow list
-   */
-  private isInAllowList(url: string): boolean {
-    return this.settings.allowList.some(pattern => url.includes(pattern));
-  }
-
-  /**
-   * Check if URL is in block list
-   */
-  private isInBlockList(url: string): boolean {
-    return this.settings.blockList.some(pattern => url.includes(pattern));
-  }
-
-  /**
-   * Update filter settings
+   * Updates filter settings
    */
   updateSettings(newSettings: Partial<FilterSettings>): void {
     this.settings = { ...this.settings, ...newSettings };
   }
 
   /**
-   * Get current settings
+   * Gets current filter settings
    */
   getSettings(): FilterSettings {
     return { ...this.settings };
   }
 
   /**
-   * Get filtering statistics
+   * Clears all hidden elements and shows them
    */
-  getStats() {
-    return { ...this.stats };
+  clearAll(): void {
+    this.hiddenElements.forEach((originalDisplay, element) => {
+      element.style.display = originalDisplay;
+      element.classList.remove('clean-web-hidden');
+    });
+    this.hiddenElements.clear();
   }
 
   /**
-   * Clear all applied filters
+   * Gets statistics about filtered images
    */
-  clearAll(): void {
-    this.filteredElements.forEach(element => {
-      // Remove any applied styling
-      const img = element as HTMLImageElement;
-      if (img.tagName === 'IMG') {
-        img.style.display = '';
-      } else {
-        element.style.backgroundImage = '';
-        element.style.backgroundColor = '';
-      }
-      
-      // Remove placeholders
-      const placeholders = element.parentNode?.querySelectorAll('.clean-web-blocked-image');
-      placeholders?.forEach(p => p.remove());
-    });
-
-    this.filteredElements.clear();
-    this.stats = {
-      totalProcessed: 0,
-      totalBlocked: 0,
-      totalAllowed: 0
+  getStats(): { hiddenCount: number; totalProcessed: number } {
+    return {
+      hiddenCount: this.hiddenElements.size,
+      totalProcessed: this.hiddenElements.size // This would be more comprehensive in a real implementation
     };
   }
 }

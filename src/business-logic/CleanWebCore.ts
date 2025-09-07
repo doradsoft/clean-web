@@ -26,7 +26,6 @@ export class CleanWebCore {
     }
 
     this.isRunning = true;
-    console.log('CleanWebCore: Starting...');
 
     // Process existing images
     await this.processExistingImages();
@@ -35,8 +34,6 @@ export class CleanWebCore {
     this.detector.startObserving(async (newImages) => {
       await this.processImages(newImages);
     });
-
-    console.log('CleanWebCore: Started successfully');
   }
 
   /**
@@ -47,11 +44,9 @@ export class CleanWebCore {
       return;
     }
 
-    console.log('CleanWebCore: Stopping...');
     this.isRunning = false;
     this.detector.stopObserving();
     this.filter.clearAll();
-    console.log('CleanWebCore: Stopped');
   }
 
   /**
@@ -59,7 +54,6 @@ export class CleanWebCore {
    */
   private async processExistingImages(): Promise<void> {
     const images = this.detector.detectImages();
-    console.log(`CleanWebCore: Found ${images.length} existing images`);
     await this.processImages(images);
   }
 
@@ -107,7 +101,6 @@ export class CleanWebCore {
   getStats() {
     return {
       ...this.filter.getStats(),
-      ...this.detector.getStats(),
       isRunning: this.isRunning
     };
   }
@@ -121,12 +114,5 @@ export class CleanWebCore {
     }
 
     await this.processExistingImages();
-  }
-
-  /**
-   * Add visual indicators to detected images (for debugging)
-   */
-  addVisualIndicators(): void {
-    this.detector.addVisualIndicators();
   }
 }
