@@ -1,6 +1,6 @@
 /**
  * Chrome Extension Content Script
- * This script runs on all web pages and implements the "hide all before processing" functionality
+ * This script implements the "hide all before processing" functionality with comprehensive detection
  * using the separated business logic from the clean-web core with real TensorFlow.js integration
  */
 
@@ -9,7 +9,6 @@ import { FilterSettings } from '@/types';
 
 class CleanWebExtension {
   private core: CleanWebCore;
-  private hiddenCount = 0;
   private settings: FilterSettings;
 
   constructor() {
@@ -28,21 +27,32 @@ class CleanWebExtension {
   private async init(): Promise<void> {
     try {
       // Load settings from Chrome storage
-      await this.loadSettings();
+      this.settings = await this.loadSettings();
       
-      // Update core with loaded settings
+      // Initialize Clean Web core with settings
       this.core = new CleanWebCore(this.settings);
       
       // Start the core with immediate hiding functionality for "hide all before processing"
       await this.core.startWithImmediateHiding();
       
-      // Update hidden count
-      this.updateHiddenCount();
-      
-      // Set up periodic count updates
-      setInterval(() => this.updateHiddenCount(), 1000);
-      
       console.log('[Clean Web] Extension initialized - all images hidden before processing with real AI');
+      
+      // Send initial stats to background
+      this.sendStatsUpdate();
+      
+      // Set up periodic stats updates
+      setInterval(() => {
+        this.sendStatsUpdate();
+      }, 1000);
+      
+      // Listen for stats requests from popup
+      chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+        if (message.type === 'REQUEST_STATS') {
+          const stats = this.core.getStats();
+          sendResponse(stats);
+        }
+      });
+      
     } catch (error) {
       console.error('[Clean Web] Failed to initialize:', error);
       
@@ -56,7 +66,7 @@ class CleanWebExtension {
     }
   }
 
-  private async loadSettings(): Promise<void> {
+  private async loadSettings(): Promise<FilterSettings> {
     return new Promise((resolve) => {
       if (typeof chrome !== 'undefined' && chrome.storage) {
         chrome.storage.sync.get({
@@ -65,23 +75,28 @@ class CleanWebExtension {
           allowList: [],
           blockList: []
         }, (result) => {
-          this.settings = result as FilterSettings;
-          resolve();
+          resolve(result as FilterSettings);
         });
       } else {
-        resolve();
+        resolve({
+          nudityThreshold: 5,
+          strictMode: false,
+          allowList: [],
+          blockList: []
+        });
       }
     });
   }
-
-  private updateHiddenCount(): void {
+  
+  private sendStatsUpdate() {
     const stats = this.core.getStats();
-    this.hiddenCount = stats.hiddenCount;
-    
-    // Store count for popup access
-    if (typeof chrome !== 'undefined' && chrome.storage) {
-      chrome.storage.local.set({ hiddenCount: this.hiddenCount });
-    }
+    chrome.runtime.sendMessage({
+      type: 'STATS_UPDATE',
+      data: stats
+    }).catch(error => {
+      // Ignore errors if background script isn't ready
+      console.debug('Could not send stats update:', error);
+    });
   }
 
   /**
@@ -96,10 +111,7 @@ class CleanWebExtension {
    * Get current statistics
    */
   public getStats() {
-    return {
-      ...this.core.getStats(),
-      hiddenCount: this.hiddenCount
-    };
+    return this.core.getStats();
   }
 }
 
