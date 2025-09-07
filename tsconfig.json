@@ -4,13 +4,22 @@
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
+<<<<<<< HEAD
+=======
+    "types": ["node", "chrome"],
+>>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
     "skipLibCheck": true,
 
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
+<<<<<<< HEAD
     "isolatedModules": true,
     "moduleDetection": "force",
+=======
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+>>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
     "noEmit": true,
     "jsx": "react-jsx",
 
@@ -30,5 +39,10 @@
       "@/types/*": ["src/types/*"]
     }
   },
+<<<<<<< HEAD
   "include": ["src/**/*", "vite.config.ts"]
+=======
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+>>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
 }

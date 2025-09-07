@@ -1,18 +1,94 @@
-# clean-web
+# Clean Web
 
-A Chrome extension to block problematic images from rendering in HTML pages by hiding them before processing.
+Block problematic images from rendering in web pages using AI-powered content analysis. Available as both a Chrome extension and a web application with separated business logic.
 
-## Overview
+## Quick Start
 
-The goal is to create a content filtering system that:
-- Hides all image elements (img, background images, videos) by default **before processing**
-- Fetches their underlying images for classification
-- Classifies content levels (future feature)
-- Blocks/allows content accordingly (future feature)
+### Chrome Extension
+```bash
+npm install
+npm run build:extension
+```
+Then load the `dist/extension` folder in Chrome's developer mode.
 
-## Current Implementation
+### Web Application  
+```bash
+npm install
+npm run build
+npm run preview
+```
 
-This version implements the **"hide all before processing"** functionality:
+## Architecture
+
+This project uses a **TypeScript + React + Vite** setup with **completely separated business logic**:
+
+```
+src/
+├── business-logic/          # Core AI-powered image filtering (framework-agnostic)
+│   ├── CleanWebCore.ts      # Main orchestrator
+│   ├── ImageClassifier.ts   # AI image analysis
+│   ├── ImageDetector.ts     # DOM image detection  
+│   ├── ImageFilter.ts       # Image blocking/allowing
+│   └── index.ts             # Business logic exports
+├── extension/               # Chrome Extension (uses business logic)
+│   ├── content.ts           # Content script
+│   ├── background.ts        # Service worker
+│   ├── popup.tsx            # React-based settings popup
+│   ├── popup.html           # Popup HTML
+│   └── manifest.json        # Extension manifest
+├── components/              # React UI components (for web app)
+│   ├── App.tsx              # Main application
+│   ├── CleanWebControls.tsx # Control panel
+│   └── index.ts             # Component exports  
+├── types/                   # TypeScript definitions
+└── main.tsx                 # Web app entry point
+```
+
+## Features
+
+### Smart Image Analysis
+- **AI-powered nudity detection** with configurable sensitivity (0-10 scale)
+- **Strict mode** for enhanced filtering
+- **Custom allow/block lists** with regex support
+- **Real-time processing** of existing and dynamically added images
+
+### Chrome Extension Capabilities
+- **"Hide all before processing" functionality** - immediately hides all images on page load
+- **Automatic image hiding** on page load for all img, video, and background images
+- **Background service worker** for extension lifecycle management
+- **React-based popup UI** for real-time settings adjustment
+- **Chrome storage integration** for settings persistence
+- **Manifest V3 compliance** with proper security permissions
+- **Dynamic content monitoring** - hides new images as they are added to the page
+
+### Web Application
+- **Full React UI** with the same business logic as the extension
+- **Development server** with hot reload
+- **Production builds** optimized for performance
+
+## Development Commands
+
+```bash
+# Install dependencies
+npm install
+
+# Chrome Extension
+npm run build:extension     # Build extension 
+npm run validate            # Validate extension files
+npm test                   # Build and validate extension
+
+# Web Application
+npm run dev                # Start development server
+npm run build              # Build for production
+npm run preview            # Preview production build
+
+# Utilities
+npm run clean              # Clean build directories
+```
+
+## Chrome Extension "Hide All Before Processing" Implementation
+
+The Chrome extension implements the specific "hide all before processing" functionality:
 
 ✅ **Implemented Features:**
 - Immediately hides all `<img>` elements on page load
@@ -21,32 +97,68 @@ This version implements the **"hide all before processing"** functionality:
 - Monitors for dynamically added content and hides new images
 - Provides popup interface to monitor hidden elements count
 - Debug functionality to restore all hidden images
+- Uses `CleanWebCore.startWithImmediateHiding()` method
 
-## Installation
+## Business Logic Separation
 
-1. Clone this repository
+The core image filtering logic is completely framework-agnostic and can be used in:
+
+- ✅ **Chrome Extensions** (content scripts)
+- ✅ **React Applications** (web UI)  
+- ✅ **Node.js Services** (server-side processing)
+- ✅ **Web Workers** (background processing)
+- ✅ **Any JavaScript Environment**
+
+### Core Classes
+
+1. **`CleanWebCore`** - Main orchestrator that coordinates all components
+2. **`ImageClassifier`** - Handles AI-powered image analysis and nudity detection
+3. **`ImageDetector`** - Finds and monitors image elements in the DOM
+4. **`ImageFilter`** - Manages blocking/allowing of images based on analysis
+
+## Chrome Extension Installation
+
+1. Run `npm run build:extension`
 2. Open Chrome and go to `chrome://extensions/`
-3. Enable "Developer mode"
-4. Click "Load unpacked" and select the project directory
-5. The extension will be active on all web pages
+3. Enable "Developer mode" (toggle in top right)
+4. Click "Load unpacked" and select the `dist/extension` folder
+5. The extension will appear in your extensions list
+
+The extension will automatically:
+- Hide images on page load **before processing**
+- Analyze images using AI classification
+- Show/hide images based on your sensitivity settings
+- Provide a popup UI for adjusting settings in real-time
 
 ## Testing
 
-Open `test.html` in your browser to test the image hiding functionality. The extension should immediately hide all images, videos, and background images on the page.
+Open `test-page.html` in your browser to test the image hiding functionality. The extension should immediately hide all images, videos, and background images on the page.
 
-## Files Structure
+## Configuration
 
-- `manifest.json` - Chrome extension manifest
-- `content.js` - Content script that hides images
-- `content.css` - CSS styles for hiding elements  
-- `popup.html` - Extension popup interface
-- `popup.js` - Popup functionality
-- `test.html` - Test page with various image types
+### Extension Settings (via popup)
+- **Nudity Threshold**: 0 (permissive) to 10 (strict)
+- **Strict Mode**: Enhanced filtering rules
+- **Allow List**: Domains/patterns to always allow
+- **Block List**: Domains/patterns to always block
 
-## Future Development
+### Web App Settings (via UI controls)
+- Same settings as extension but with full React UI
+- Real-time statistics and monitoring
+- Advanced debugging and development features
 
-- Image classification system
-- Nudity/content level detection
-- Smart allow/block decisions
-- User preferences and whitelist
-- Performance optimizations
+## Technology Stack
+
+- **TypeScript** - Type safety and better development experience
+- **React** - UI components and state management
+- **Vite** - Fast build tool and development server
+- **Chrome Extension APIs** - Storage, runtime messaging, content scripts
+- **Manifest V3** - Latest Chrome extension standard
+
+## Future Enhancements
+
+- Integration with external AI services (OpenAI, Google Vision, etc.)
+- Local ML model support for offline processing
+- Enhanced image classification beyond nudity detection
+- Performance optimizations for large pages
+- Advanced filtering rules and exceptions

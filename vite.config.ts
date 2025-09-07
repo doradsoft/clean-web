@@ -3,8 +3,38 @@ import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 
 export default defineConfig(({ mode }) => {
+<<<<<<< HEAD
   const baseConfig = {
     plugins: [react()],
+=======
+  const isExtension = mode === 'extension';
+  
+  return {
+    plugins: [react()],
+    build: {
+      rollupOptions: isExtension ? {
+        // Extension build configuration
+        input: {
+          content: resolve(__dirname, 'src/extension/content.ts'),
+          background: resolve(__dirname, 'src/extension/background.ts'),
+          popup: resolve(__dirname, 'src/extension/popup.tsx'),
+        },
+        output: {
+          entryFileNames: '[name].js',
+          chunkFileNames: 'chunks/[name]-[hash].js',
+          assetFileNames: '[name].[ext]',
+        },
+        external: [] // Don't externalize any modules for the extension
+      } : {
+        // Web app build configuration  
+        input: {
+          main: resolve(__dirname, 'index.html'),
+        },
+      },
+      outDir: isExtension ? 'dist/extension' : 'dist',
+      target: isExtension ? 'es2020' : undefined,
+    },
+>>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
     resolve: {
       alias: {
         '@': resolve(__dirname, 'src'),
@@ -14,6 +44,7 @@ export default defineConfig(({ mode }) => {
         '@/types': resolve(__dirname, 'src/types'),
       },
     },
+<<<<<<< HEAD
   };
 
   if (mode === 'extension') {
@@ -48,3 +79,10 @@ export default defineConfig(({ mode }) => {
     },
   };
 });
+=======
+    define: isExtension ? {
+      'process.env.NODE_ENV': JSON.stringify('production'),
+    } : {},
+  }
+})
+>>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056

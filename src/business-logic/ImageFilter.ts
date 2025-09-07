@@ -150,6 +150,7 @@ export class ImageFilter {
       totalProcessed: this.hiddenElements.size // This would be more comprehensive in a real implementation
     };
   }
+<<<<<<< HEAD
 
   /**
    * Immediately hides all images (for "hide all before processing" functionality)
@@ -195,4 +196,6 @@ export class ImageFilter {
       }
     });
   }
+=======
+>>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
 }
