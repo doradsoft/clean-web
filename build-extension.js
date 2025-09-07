@@ -1,22 +1,22 @@
 #!/usr/bin/env node
 
-import { execSync } from 'child_process';
-import { promises as fs } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { execSync } from "child_process";
+import { promises as fs } from "fs";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const srcDir = resolve(__dirname, 'src/extension');
-const outDir = resolve(__dirname, 'dist/extension');
+const srcDir = resolve(__dirname, "src/extension");
+const outDir = resolve(__dirname, "dist/extension");
 
 async function buildExtension() {
-  console.log('🏗️  Building Clean Web Extension...');
-  
+  console.log("🏗️  Building Clean Web Extension...");
+
   try {
     // 1. Clean the output directory
-    console.log('🧹 Cleaning output directory...');
+    console.log("🧹 Cleaning output directory...");
     try {
       await fs.rm(outDir, { recursive: true, force: true });
     } catch (error) {
@@ -24,21 +24,29 @@ async function buildExtension() {
     }
     await fs.mkdir(outDir, { recursive: true });
 
-    // 2. Build TypeScript files with Vite
-    console.log('📦 Building TypeScript files...');
-    execSync('vite build --config vite.extension.config.ts', { stdio: 'inherit' });
+    // 2. Build TypeScript files with Vite (separately for each script)
+    console.log("📦 Building TypeScript files...");
+
+    // Build content script as IIFE
+    console.log("   🔧 Building content script (IIFE)...");
+    execSync("vite build --config vite.content.config.ts", { stdio: "inherit" });
+
+    // Build background script as ES module
+    console.log("   🔧 Building background script (ES module)...");
+    execSync("vite build --config vite.background.config.ts", { stdio: "inherit" });
+
+    // Build popup script as ES module
+    console.log("   🔧 Building popup script (ES module)...");
+    execSync("vite build --config vite.popup.config.ts", { stdio: "inherit" });
 
     // 3. Copy static files
-    console.log('📄 Copying static files...');
-    const staticFiles = [
-      'manifest.json',
-      'popup.html'
-    ];
+    console.log("📄 Copying static files...");
+    const staticFiles = ["manifest.json", "popup.html"];
 
     for (const file of staticFiles) {
       const srcPath = resolve(srcDir, file);
       const destPath = resolve(outDir, file);
-      
+
       try {
         await fs.copyFile(srcPath, destPath);
         console.log(`   ✅ Copied ${file}`);
@@ -48,11 +56,11 @@ async function buildExtension() {
     }
 
     // 4. Copy CSS files
-    const cssFiles = ['content.css'];
+    const cssFiles = ["content.css"];
     for (const file of cssFiles) {
       const srcPath = resolve(srcDir, file);
       const destPath = resolve(outDir, file);
-      
+
       try {
         await fs.copyFile(srcPath, destPath);
         console.log(`   ✅ Copied ${file}`);
@@ -63,36 +71,35 @@ async function buildExtension() {
 
     // 5. Copy icon directory if it exists
     try {
-      const iconsSrcDir = resolve(srcDir, 'icons');
-      const iconsDestDir = resolve(outDir, 'icons');
-      
+      const iconsSrcDir = resolve(srcDir, "icons");
+      const iconsDestDir = resolve(outDir, "icons");
+
       // Check if icons directory exists
       await fs.access(iconsSrcDir);
-      
+
       // Copy entire icons directory
       await fs.cp(iconsSrcDir, iconsDestDir, { recursive: true });
-      console.log('   ✅ Copied icons directory');
+      console.log("   ✅ Copied icons directory");
     } catch (error) {
-      console.log('🎨 Creating placeholder icons...');
+      console.log("🎨 Creating placeholder icons...");
       const iconSizes = [16, 32, 48, 128];
-      const iconsDir = resolve(outDir, 'icons');
+      const iconsDir = resolve(outDir, "icons");
       await fs.mkdir(iconsDir, { recursive: true });
-      
+
       for (const size of iconSizes) {
         const iconContent = createPlaceholderIcon(size);
         await fs.writeFile(resolve(iconsDir, `icon${size}.png`), iconContent);
       }
     }
 
-    console.log('✅ Extension build completed successfully!');
+    console.log("✅ Extension build completed successfully!");
     console.log(`📁 Extension files are in: ${outDir}`);
-    console.log('\n📖 To load the extension in Chrome:');
-    console.log('1. Open Chrome and go to chrome://extensions/');
+    console.log("\n📖 To load the extension in Chrome:");
+    console.log("1. Open Chrome and go to chrome://extensions/");
     console.log('2. Enable "Developer mode" (toggle in top right)');
     console.log('3. Click "Load unpacked" and select the dist/extension folder');
-    
   } catch (error) {
-    console.error('❌ Extension build failed:', error.message);
+    console.error("❌ Extension build failed:", error.message);
     process.exit(1);
   }
 }
@@ -103,13 +110,15 @@ function createPlaceholderIcon(size) {
   const svg = `
     <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
       <rect width="${size}" height="${size}" fill="#2563eb" rx="4"/>
-      <text x="50%" y="50%" text-anchor="middle" dy="0.3em" fill="white" font-family="Arial, sans-serif" font-size="${size * 0.4}" font-weight="bold">CW</text>
+      <text x="50%" y="50%" text-anchor="middle" dy="0.3em" fill="white" font-family="Arial, sans-serif" font-size="${
+        size * 0.4
+      }" font-weight="bold">CW</text>
     </svg>
   `;
-  
+
   // For now, just return the SVG as text
   // In production, you'd convert SVG to PNG
-  return Buffer.from(svg, 'utf8');
+  return Buffer.from(svg, "utf8");
 }
 
 buildExtension().catch(console.error);
