@@ -17,3 +17,8 @@ export interface ImageElement {
   src: string;
   type: 'img' | 'background' | 'video';
 }
+
+/**
+ * Image buffer type - can be Buffer or Uint8Array
+ */
+export type ImageBuffer = Buffer | Uint8Array;

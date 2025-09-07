@@ -1,5 +1,12 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import React, { useState, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
+
+interface Settings {
+  nudityThreshold: number;
+  strictMode: boolean;
+  allowList: string[];
+  blockList: string[];
+}
 
 interface Stats {
   total: number;
@@ -8,128 +15,203 @@ interface Stats {
   video: number;
 }
 
-const PopupApp: React.FC = () => {
-  const [stats, setStats] = React.useState<Stats>({ total: 0, img: 0, background: 0, video: 0 });
+const Popup: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'settings' | 'stats'>('stats');
+  const [settings, setSettings] = useState<Settings>({
+    nudityThreshold: 5,
+    strictMode: false,
+    allowList: [],
+    blockList: []
+  });
+  const [stats, setStats] = useState<Stats>({ total: 0, img: 0, background: 0, video: 0 });
+  const [loading, setLoading] = useState(true);
 
-  const updateStats = React.useCallback(async () => {
+  useEffect(() => {
+    // Load current settings
+    chrome.runtime.sendMessage({ type: 'GET_SETTINGS' }, (response) => {
+      if (response) {
+        setSettings(response);
+      }
+      setLoading(false);
+    });
+    
+    // Load current stats
+    updateStats();
+  }, []);
+
+  const updateSettings = (newSettings: Partial<Settings>) => {
+    const updatedSettings = { ...settings, ...newSettings };
+    setSettings(updatedSettings);
+    
+    chrome.runtime.sendMessage({
+      type: 'UPDATE_SETTINGS',
+      settings: updatedSettings
+    }, (response) => {
+      if (response?.success) {
+        console.log('Settings updated successfully');
+      }
+    });
+  };
+
+  const updateStats = async () => {
     try {
-      // Get the active tab and execute script to get stats
+      // Get the active tab and request stats from content script
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       
       if (tab?.id) {
-        const results = await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: () => {
-            // This function runs in the content script context
-            // We need to get the stats from the CleanWebCore instance
-            const event = new CustomEvent('getCleanWebStats');
-            document.dispatchEvent(event);
-            
-            // For now, return placeholder stats
-            // In a real implementation, this would communicate with the content script
-            return {
-              total: (window as any).cleanWebStats?.total || 0,
-              img: (window as any).cleanWebStats?.img || 0,
-              background: (window as any).cleanWebStats?.background || 0,
-              video: (window as any).cleanWebStats?.video || 0
-            };
+        chrome.tabs.sendMessage(tab.id, { type: 'REQUEST_STATS' }, (response) => {
+          if (response) {
+            setStats(response);
           }
         });
-
-        if (results[0]?.result) {
-          setStats(results[0].result);
-        }
       }
     } catch (error) {
       console.error('Failed to get stats:', error);
     }
-  }, []);
+  };
 
-  React.useEffect(() => {
-    updateStats();
-  }, [updateStats]);
+  const reloadContentScripts = () => {
+    chrome.runtime.sendMessage({ type: 'RELOAD_CONTENT_SCRIPTS' }, (response) => {
+      if (response?.success) {
+        window.close(); // Close popup after reload
+      }
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="popup">
+        <div className="loading">Loading settings...</div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ width: '300px', padding: '16px', fontFamily: 'system-ui' }}>
-      <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-        <h1 style={{ margin: '0 0 4px 0', fontSize: '18px' }}>Clean Web</h1>
-        <p style={{ color: '#666', fontSize: '12px', margin: 0 }}>Image Detection Stats</p>
-      </div>
-      
-      <div style={{ background: 'white', borderRadius: '8px', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #eee' }}>
-          <span>Total Images:</span>
-          <span style={{ fontWeight: 'bold' }}>{stats.total}</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #eee' }}>
-          <span>IMG Elements:</span>
-          <span style={{ fontWeight: 'bold' }}>{stats.img}</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #eee' }}>
-          <span>Background Images:</span>
-          <span style={{ fontWeight: 'bold' }}>{stats.background}</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
-          <span>Video Posters:</span>
-          <span style={{ fontWeight: 'bold' }}>{stats.video}</span>
-        </div>
-        
+    <div className="popup">
+      <header className="popup-header">
+        <h1>Clean Web</h1>
+        <p>Comprehensive Image Detection & Filtering</p>
+      </header>
+
+      <div className="tabs">
         <button 
-          onClick={updateStats}
-          style={{
-            width: '100%',
-            marginTop: '12px',
-            padding: '8px 16px',
-            background: '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer'
-          }}
+          className={`tab ${activeTab === 'stats' ? 'active' : ''}`}
+          onClick={() => setActiveTab('stats')}
         >
-          Refresh
+          Detection Stats
+        </button>
+        <button 
+          className={`tab ${activeTab === 'settings' ? 'active' : ''}`}
+          onClick={() => setActiveTab('settings')}
+        >
+          Settings
         </button>
       </div>
-      
-      <div style={{ textAlign: 'center', color: '#10b981', fontSize: '12px', marginTop: '12px' }}>
-        Extension Active
-      </div>
+
+      <main className="popup-content">
+        {/* Stats Tab */}
+        <div className={`tab-content ${activeTab === 'stats' ? 'active' : ''}`}>
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-value">{stats.total}</div>
+              <div className="stat-label">Total Images</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{stats.img}</div>
+              <div className="stat-label">IMG Elements</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{stats.background}</div>
+              <div className="stat-label">Background Images</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{stats.video}</div>
+              <div className="stat-label">Video Posters</div>
+            </div>
+          </div>
+          
+          <div className="actions">
+            <button onClick={updateStats} className="refresh-btn">
+              Refresh Stats
+            </button>
+          </div>
+        </div>
+
+        {/* Settings Tab */}
+        <div className={`tab-content ${activeTab === 'settings' ? 'active' : ''}`}>
+          <div className="setting-group">
+            <label htmlFor="threshold">
+              Sensitivity Level: {settings.nudityThreshold}
+            </label>
+            <input
+              id="threshold"
+              type="range"
+              min="0"
+              max="10"
+              value={settings.nudityThreshold}
+              onChange={(e) => updateSettings({ nudityThreshold: parseInt(e.target.value) })}
+            />
+            <div className="threshold-labels">
+              <span>Permissive (0)</span>
+              <span>Strict (10)</span>
+            </div>
+          </div>
+
+          <div className="setting-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={settings.strictMode}
+                onChange={(e) => updateSettings({ strictMode: e.target.checked })}
+              />
+              Enhanced filtering (Strict Mode)
+            </label>
+          </div>
+
+          <div className="setting-group">
+            <label htmlFor="allowList">Always Allow (domains):</label>
+            <textarea
+              id="allowList"
+              value={settings.allowList.join('\n')}
+              onChange={(e) => updateSettings({ 
+                allowList: e.target.value.split('\n').filter(s => s.trim()) 
+              })}
+              placeholder="example.com&#10;trusted-site.org"
+              rows={3}
+            />
+          </div>
+
+          <div className="setting-group">
+            <label htmlFor="blockList">Always Block (domains):</label>
+            <textarea
+              id="blockList"
+              value={settings.blockList.join('\n')}
+              onChange={(e) => updateSettings({ 
+                blockList: e.target.value.split('\n').filter(s => s.trim()) 
+              })}
+              placeholder="blocked-site.com&#10;suspicious-domain.net"
+              rows={3}
+            />
+          </div>
+
+          <div className="actions">
+            <button onClick={reloadContentScripts} className="reload-btn">
+              Apply & Reload Pages
+            </button>
+          </div>
+        </div>
+      </main>
+
+      <footer className="popup-footer">
+        <small>Comprehensive Mutation Observer Detection</small>
+      </footer>
     </div>
   );
 };
 
-// Mount the React app
-const rootElement = document.getElementById('root');
-if (rootElement) {
-  const root = ReactDOM.createRoot(rootElement);
-  root.render(<PopupApp />);
-} else {
-  // Fallback to vanilla JS if React mount fails
-  document.addEventListener('DOMContentLoaded', () => {
-    const refreshBtn = document.getElementById('refresh');
-    const totalCount = document.getElementById('total-count');
-    const imgCount = document.getElementById('img-count');
-    const bgCount = document.getElementById('bg-count');
-    const videoCount = document.getElementById('video-count');
-
-    async function updateStats() {
-      try {
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        
-        if (tab?.id) {
-          // For now, set placeholder values
-          // In a real implementation, this would communicate with content script
-          if (totalCount) totalCount.textContent = '0';
-          if (imgCount) imgCount.textContent = '0';
-          if (bgCount) bgCount.textContent = '0';
-          if (videoCount) videoCount.textContent = '0';
-        }
-      } catch (error) {
-        console.error('Failed to get stats:', error);
-      }
-    }
-
-    refreshBtn?.addEventListener('click', updateStats);
-    updateStats();
-  });
+// Initialize React app
+const container = document.getElementById('root');
+if (container) {
+  const root = createRoot(container);
+  root.render(<Popup />);
 }
