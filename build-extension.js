@@ -47,7 +47,6 @@ async function buildExtension() {
       }
     }
 
-<<<<<<< HEAD
     // 4. Copy CSS files
     const cssFiles = ['content.css'];
     for (const file of cssFiles) {
@@ -83,14 +82,6 @@ async function buildExtension() {
         const iconContent = createPlaceholderIcon(size);
         await fs.writeFile(resolve(iconsDir, `icon${size}.png`), iconContent);
       }
-=======
-    // 4. Create basic icons (placeholder)
-    console.log('🎨 Creating placeholder icons...');
-    const iconSizes = [16, 32, 48, 128];
-    for (const size of iconSizes) {
-      const iconContent = createPlaceholderIcon(size);
-      await fs.writeFile(resolve(outDir, `icon-${size}.png`), iconContent);
->>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
     }
 
     console.log('✅ Extension build completed successfully!');
@@ -116,18 +107,9 @@ function createPlaceholderIcon(size) {
     </svg>
   `;
   
-<<<<<<< HEAD
   // For now, just return the SVG as text
   // In production, you'd convert SVG to PNG
   return Buffer.from(svg, 'utf8');
 }
 
 buildExtension().catch(console.error);
-=======
-  // For simplicity, we'll just create an empty file
-  // In a real implementation, you'd convert SVG to PNG or use actual PNG files
-  return Buffer.from(''); // Placeholder
-}
-
-buildExtension();
->>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
