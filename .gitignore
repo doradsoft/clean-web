@@ -86,6 +86,6 @@ jspm_packages/
 .dynamodb/
 
 # Chrome extension build files
-extension/
+dist/extension/
 *.crx
 *.pem
