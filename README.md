@@ -124,6 +124,64 @@ npm run preview            # Preview production build
 npm run clean              # Clean build directories
 ```
 
+## Testing Infrastructure
+
+This project includes comprehensive testing infrastructure using platform-independent tools:
+
+- **Unit Tests**: Jest framework for testing TypeScript business logic and React components
+- **E2E Tests**: Playwright for cross-browser end-to-end testing
+- **Integration Tests**: Full workflow testing for complete image processing pipelines
+- **Test Coverage**: Automated coverage reporting with HTML and LCOV output
+
+### Testing Commands
+
+```bash
+# Unit testing
+npm run test:unit           # Run Jest unit tests
+npm run test:unit:watch     # Run unit tests in watch mode
+npm run test:coverage       # Generate coverage reports
+
+# E2E testing  
+npm run install:playwright  # Install Playwright browsers (one-time setup)
+npm run test:e2e           # Run Playwright E2E tests
+npm run test:e2e:headed    # Run E2E tests with visible browser
+
+# Integration testing
+npm run test:integration   # Run integration workflow tests
+
+# All tests
+npm run test:all           # Run all test suites
+```
+
+### Test Structure
+
+```
+tests/
+├── unit/           # Jest unit tests for TS/React components
+│   ├── ImageFilter.test.js
+│   ├── ImageClassifier.test.js
+│   ├── CleanWebControls.test.js
+│   └── integration.test.js
+├── e2e/            # Playwright E2E and extension tests
+│   ├── extension.spec.js
+│   ├── web-app.spec.js
+│   └── cross-browser.spec.js
+├── fixtures/       # Interactive test data and demo pages
+│   └── test-images/
+└── setup.ts        # Test configuration and mocks
+```
+
+### Testing Features
+
+- **Comprehensive Coverage**: Tests for ImageFilter, ImageClassifier, and React components
+- **Mocked Dependencies**: TensorFlow.js, NSFWJS, and Chrome APIs mocked for reliable testing
+- **Interactive Fixtures**: Demo HTML pages for manual testing and E2E automation
+- **Chrome Extension Testing**: Specialized tests for extension functionality
+- **Cross-Browser Testing**: Support for Chromium, Firefox, and WebKit
+- **Platform Independence**: Works on Windows, macOS, and Linux
+
+For detailed testing documentation, see [docs/testing.md](docs/testing.md).
+
 ## Chrome Extension "Hide All Before Processing" Implementation
 
 The Chrome extension implements the specific "hide all before processing" functionality:
@@ -194,6 +252,9 @@ Open `test-page.html` in your browser to test the image hiding functionality. Th
 - **Vite** - Fast build tool and development server
 - **Chrome Extension APIs** - Storage, runtime messaging, content scripts
 - **Manifest V3** - Latest Chrome extension standard
+- **Jest** - Unit testing framework with TypeScript support
+- **Playwright** - Cross-browser end-to-end testing
+- **React Testing Library** - React component testing utilities
 
 ## Implementation Details
 
@@ -210,3 +271,4 @@ Open `test-page.html` in your browser to test the image hiding functionality. Th
 - **Enhanced image classification**: Beyond nudity detection for comprehensive filtering
 - **Performance optimizations**: Optimized for large pages with many images
 - **Advanced filtering rules**: Complex exceptions and rule-based systems
+- **Comprehensive Test Coverage**: Jest and Playwright testing with 80%+ coverage thresholds
