@@ -1,9 +1,10 @@
 # Image Classification Feature
 
-This module provides a generic image classification system for the clean-web project, designed to classify images and determine whether they should be blocked or allowed.
+This module provides a **TypeScript-based** generic image classification system for the clean-web project, designed to classify images and determine whether they should be blocked or allowed.
 
 ## Features
 
+- **Type-Safe Architecture**: Full TypeScript support with interfaces and type definitions
 - **Generic Interface**: Extensible base classifier that can be implemented for different classification algorithms
 - **Mock Classifiers**: Testing utilities that always block or always allow images
 - **NSFW Classifier**: Real classifier for detecting inappropriate content
@@ -11,8 +12,8 @@ This module provides a generic image classification system for the clean-web pro
 
 ## Quick Start
 
-```javascript
-const { ImageClassificationService } = require('./src');
+```typescript
+import { ImageClassificationService } from './dist';
 
 // Create service with default classifiers
 const service = ImageClassificationService.createDefault();
@@ -64,18 +65,24 @@ Abstract base class for all classifiers.
 - `getName()` - Return classifier name
 
 #### Classification Result Format:
-```javascript
-{
-  isBlocked: boolean,    // Whether image should be blocked
-  confidence: number,    // Confidence score (0-1)
-  reason?: string        // Optional explanation
+```typescript
+interface ClassificationResult {
+  isBlocked: boolean;    // Whether image should be blocked
+  confidence: number;    // Confidence score (0-1)
+  reason?: string;       // Optional explanation
+}
+
+interface ExtendedClassificationResult extends ClassificationResult {
+  classifier: string;    // Name of classifier used
 }
 ```
 
 ## Usage Examples
 
 ### Basic Usage
-```javascript
+```typescript
+import { ImageClassificationService } from './dist';
+
 const service = ImageClassificationService.createDefault();
 const result = await service.classifyImage(imageBuffer);
 if (result.isBlocked) {
@@ -84,7 +91,7 @@ if (result.isBlocked) {
 ```
 
 ### Using Specific Classifier
-```javascript
+```typescript
 // Use mock classifier for testing
 const mockResult = await service.classifyImage(imageBuffer, 'mock-block');
 
@@ -93,9 +100,11 @@ const nsfwResult = await service.classifyImage(imageBuffer, 'nsfw');
 ```
 
 ### Custom Classifier
-```javascript
+```typescript
+import { BaseClassifier, ClassificationResult, ImageBuffer } from './dist';
+
 class CustomClassifier extends BaseClassifier {
-  async classify(imageBuffer) {
+  async classify(imageBuffer: ImageBuffer): Promise<ClassificationResult> {
     // Your classification logic here
     return {
       isBlocked: false,
@@ -104,12 +113,20 @@ class CustomClassifier extends BaseClassifier {
     };
   }
   
-  getName() {
+  getName(): string {
     return 'custom';
   }
 }
 
 service.registerClassifier('custom', new CustomClassifier());
+```
+
+## Development
+
+Build the project:
+```bash
+npm run build     # Build TypeScript to JavaScript
+npm run dev       # Watch mode for development
 ```
 
 ## Testing
@@ -121,7 +138,7 @@ npm test
 
 Run the example demonstration:
 ```bash
-node example.js
+node dist/example.js
 ```
 
 ## Integration Notes
@@ -148,3 +165,11 @@ ImageClassificationService
 ```
 
 The service acts as a registry and facade, allowing easy switching between different classification strategies while maintaining a consistent API.
+
+## TypeScript Support
+
+The library includes:
+- Full type definitions (.d.ts files)
+- Source maps for debugging
+- Strict type checking
+- Generic interfaces for extensibility

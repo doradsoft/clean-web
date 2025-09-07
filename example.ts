@@ -1,9 +1,9 @@
-const { ImageClassificationService } = require('./src/index');
+import { ImageClassificationService } from './src/index';
 
 /**
  * Example demonstrating how to use the image classification service
  */
-async function demonstrateClassification() {
+async function demonstrateClassification(): Promise<void> {
   console.log('🖼️  Clean-Web Image Classification Demo');
   console.log('=====================================\n');
 
@@ -48,7 +48,8 @@ async function demonstrateClassification() {
     console.log('✨ All classifiers working correctly!');
 
   } catch (error) {
-    console.error('❌ Error during classification:', error.message);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('❌ Error during classification:', errorMessage);
   }
 }
 
@@ -57,4 +58,4 @@ if (require.main === module) {
   demonstrateClassification().catch(console.error);
 }
 
-module.exports = { demonstrateClassification };
+export { demonstrateClassification };

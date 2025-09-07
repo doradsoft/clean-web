@@ -1,24 +1,42 @@
-const BaseClassifier = require('./BaseClassifier');
+import { BaseClassifier } from './BaseClassifier';
+import { ClassificationResult, ImageBuffer } from '../types';
+
+/**
+ * NSFW prediction result from the model
+ */
+interface NSFWPrediction {
+  className: string;
+  probability: number;
+}
+
+/**
+ * Mock NSFW model interface
+ */
+interface NSFWModel {
+  classify(imageBuffer: ImageBuffer): Promise<NSFWPrediction[]>;
+}
 
 /**
  * NSFW-based classifier using nsfwjs library
  * Classifies images for inappropriate content
  */
-class NSFWClassifier extends BaseClassifier {
+export class NSFWClassifier extends BaseClassifier {
+  private threshold: number;
+  private nsfwModel: NSFWModel | null = null;
+
   /**
    * Create NSFW classifier
-   * @param {number} threshold - Threshold for blocking (0-1, default 0.5)
+   * @param threshold - Threshold for blocking (0-1, default 0.5)
    */
-  constructor(threshold = 0.5) {
+  constructor(threshold: number = 0.5) {
     super();
     this.threshold = threshold;
-    this.nsfwModel = null;
   }
 
   /**
    * Initialize the NSFW model (lazy loading)
    */
-  async initModel() {
+  private async initModel(): Promise<void> {
     if (this.nsfwModel) return;
     
     try {
@@ -26,7 +44,7 @@ class NSFWClassifier extends BaseClassifier {
       // For now, this is a placeholder implementation
       // In a real implementation, you'd load the actual model here
       this.nsfwModel = {
-        classify: async (imageBuffer) => {
+        classify: async (imageBuffer: ImageBuffer): Promise<NSFWPrediction[]> => {
           // Mock implementation for demonstration
           // In real scenario, this would use actual NSFW detection
           return [
@@ -37,17 +55,18 @@ class NSFWClassifier extends BaseClassifier {
         }
       };
     } catch (error) {
-      console.warn('NSFW model initialization failed, using mock classification:', error.message);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.warn('NSFW model initialization failed, using mock classification:', errorMessage);
       this.nsfwModel = null;
     }
   }
 
   /**
    * Classify an image using NSFW detection
-   * @param {Buffer|Uint8Array} imageBuffer - The image binary data
-   * @returns {Promise<{isBlocked: boolean, confidence: number, reason?: string}>} Classification result
+   * @param imageBuffer - The image binary data
+   * @returns Classification result
    */
-  async classify(imageBuffer) {
+  async classify(imageBuffer: ImageBuffer): Promise<ClassificationResult> {
     if (!imageBuffer || imageBuffer.length === 0) {
       throw new Error('Invalid image buffer provided');
     }
@@ -81,23 +100,22 @@ class NSFWClassifier extends BaseClassifier {
           : `Content appears safe (score: ${nsfwScore.toFixed(3)} <= ${this.threshold})`
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('NSFW classification error:', error);
       // Default to allowing on error to avoid false positives
       return {
         isBlocked: false,
         confidence: 0.0,
-        reason: `Classification error: ${error.message}`
+        reason: `Classification error: ${errorMessage}`
       };
     }
   }
 
   /**
    * Get classifier name
-   * @returns {string} The classifier name
+   * @returns The classifier name
    */
-  getName() {
+  getName(): string {
     return `NSFWClassifier(threshold=${this.threshold})`;
   }
 }
-
-module.exports = NSFWClassifier;

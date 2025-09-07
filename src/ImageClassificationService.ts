@@ -1,22 +1,22 @@
-const MockClassifier = require('./classifiers/MockClassifier');
-const NSFWClassifier = require('./classifiers/NSFWClassifier');
+import { BaseClassifier } from './classifiers/BaseClassifier';
+import { MockClassifier } from './classifiers/MockClassifier';
+import { NSFWClassifier } from './classifiers/NSFWClassifier';
+import { ExtendedClassificationResult, ImageBuffer } from './types';
 
 /**
  * Main image classification service
  * Provides a unified interface for image classification using different classifiers
  */
-class ImageClassificationService {
-  constructor() {
-    this.classifiers = new Map();
-    this.defaultClassifier = null;
-  }
+export class ImageClassificationService {
+  private classifiers: Map<string, BaseClassifier> = new Map();
+  private defaultClassifier: string | null = null;
 
   /**
    * Register a classifier
-   * @param {string} name - Classifier name
-   * @param {BaseClassifier} classifier - Classifier instance
+   * @param name - Classifier name
+   * @param classifier - Classifier instance
    */
-  registerClassifier(name, classifier) {
+  registerClassifier(name: string, classifier: BaseClassifier): void {
     this.classifiers.set(name, classifier);
     if (!this.defaultClassifier) {
       this.defaultClassifier = name;
@@ -25,9 +25,9 @@ class ImageClassificationService {
 
   /**
    * Set the default classifier
-   * @param {string} name - Classifier name
+   * @param name - Classifier name
    */
-  setDefaultClassifier(name) {
+  setDefaultClassifier(name: string): void {
     if (!this.classifiers.has(name)) {
       throw new Error(`Classifier '${name}' not found`);
     }
@@ -36,19 +36,19 @@ class ImageClassificationService {
 
   /**
    * Get available classifiers
-   * @returns {Array<string>} List of available classifier names
+   * @returns List of available classifier names
    */
-  getAvailableClassifiers() {
+  getAvailableClassifiers(): string[] {
     return Array.from(this.classifiers.keys());
   }
 
   /**
    * Classify an image using the specified or default classifier
-   * @param {Buffer|Uint8Array} imageBuffer - The image binary data
-   * @param {string} classifierName - Optional classifier name, uses default if not specified
-   * @returns {Promise<{isBlocked: boolean, confidence: number, reason?: string, classifier: string}>} Classification result
+   * @param imageBuffer - The image binary data
+   * @param classifierName - Optional classifier name, uses default if not specified
+   * @returns Classification result
    */
-  async classifyImage(imageBuffer, classifierName = null) {
+  async classifyImage(imageBuffer: ImageBuffer, classifierName?: string): Promise<ExtendedClassificationResult> {
     const name = classifierName || this.defaultClassifier;
     
     if (!name) {
@@ -69,9 +69,9 @@ class ImageClassificationService {
 
   /**
    * Create a pre-configured service with common classifiers
-   * @returns {ImageClassificationService} Configured service instance
+   * @returns Configured service instance
    */
-  static createDefault() {
+  static createDefault(): ImageClassificationService {
     const service = new ImageClassificationService();
     
     // Register mock classifiers
@@ -87,5 +87,3 @@ class ImageClassificationService {
     return service;
   }
 }
-
-module.exports = ImageClassificationService;

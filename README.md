@@ -7,19 +7,26 @@ goal is to block problematic images from rendering in html pages (mostly as chro
 
 ## Image Classification Feature
 
-This repository now includes a generic image classification system with:
+This repository now includes a **TypeScript-based** generic image classification system with:
+- **Type-safe architecture** with full TypeScript support
 - **Mock classifiers** for testing (always block/allow)
-- **NSFW classifier** for real content detection
+- **NSFW classifier** for real content detection  
 - **Extensible architecture** for adding custom classifiers
 
 ### Quick Start
-```javascript
-const { ImageClassificationService } = require('./src');
+```typescript
+import { ImageClassificationService } from './dist';
 const service = ImageClassificationService.createDefault();
 const result = await service.classifyImage(imageBuffer);
 ```
 
+### Development
+- `npm run build` - Compile TypeScript to JavaScript
+- `npm run dev` - Watch mode for development
+- `npm test` - Run tests
+- `npm start` - Build and run the demo
+
 ### Documentation
 - [Full API Documentation](docs/image-classification.md)
-- Run `node example.js` for a live demonstration
-- Run `npm test` to validate functionality
+- Run `node dist/example.js` for a live demonstration
+- All TypeScript definitions included for IDE support

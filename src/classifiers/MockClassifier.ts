@@ -1,25 +1,28 @@
-const BaseClassifier = require('./BaseClassifier');
+import { BaseClassifier } from './BaseClassifier';
+import { ClassificationResult, ImageBuffer } from '../types';
 
 /**
  * Mock classifier for testing purposes
  * Can be configured to always block or always allow
  */
-class MockClassifier extends BaseClassifier {
+export class MockClassifier extends BaseClassifier {
+  private alwaysBlock: boolean;
+
   /**
    * Create a mock classifier
-   * @param {boolean} alwaysBlock - If true, always blocks images. If false, always allows.
+   * @param alwaysBlock - If true, always blocks images. If false, always allows.
    */
-  constructor(alwaysBlock = true) {
+  constructor(alwaysBlock: boolean = true) {
     super();
     this.alwaysBlock = alwaysBlock;
   }
 
   /**
    * Classify an image (mock implementation)
-   * @param {Buffer|Uint8Array} imageBuffer - The image binary data
-   * @returns {Promise<{isBlocked: boolean, confidence: number, reason?: string}>} Classification result
+   * @param imageBuffer - The image binary data
+   * @returns Classification result
    */
-  async classify(imageBuffer) {
+  async classify(imageBuffer: ImageBuffer): Promise<ClassificationResult> {
     if (!imageBuffer || imageBuffer.length === 0) {
       throw new Error('Invalid image buffer provided');
     }
@@ -33,11 +36,9 @@ class MockClassifier extends BaseClassifier {
 
   /**
    * Get classifier name
-   * @returns {string} The classifier name
+   * @returns The classifier name
    */
-  getName() {
+  getName(): string {
     return `MockClassifier(alwaysBlock=${this.alwaysBlock})`;
   }
 }
-
-module.exports = MockClassifier;

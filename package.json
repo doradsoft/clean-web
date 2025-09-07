@@ -2,18 +2,31 @@
   "name": "clean-web",
   "version": "1.0.0",
   "description": "Goal is to block problematic images from rendering in html pages",
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "node --test",
-    "start": "node src/index.js"
+    "build": "tsc",
+    "build:all": "tsc -p tests/tsconfig.json",
+    "dev": "tsc --watch",
+    "test": "npm run build:all && node --test dist/tests/*.test.js",
+    "start": "npm run build && node dist/index.js",
+    "clean": "rm -rf dist"
   },
-  "keywords": ["image-classification", "nsfw", "chrome-extension"],
+  "keywords": [
+    "image-classification",
+    "nsfw",
+    "chrome-extension",
+    "typescript"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "nsfwjs": "^2.4.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.19.13",
+    "typescript": "^5.9.2"
+  },
   "engines": {
     "node": ">=14.0.0"
   }

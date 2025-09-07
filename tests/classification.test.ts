@@ -1,9 +1,9 @@
-const { describe, it } = require('node:test');
-const assert = require('node:assert');
-const { ImageClassificationService, MockClassifier, NSFWClassifier } = require('../src/index');
+import { describe, it } from 'node:test';
+import * as assert from 'node:assert';
+import { ImageClassificationService, MockClassifier, NSFWClassifier } from '../src/index';
 
 // Create a simple mock image buffer for testing
-const createMockImageBuffer = () => Buffer.from([0xFF, 0xD8, 0xFF, 0xE0]); // JPEG header
+const createMockImageBuffer = (): Buffer => Buffer.from([0xFF, 0xD8, 0xFF, 0xE0]); // JPEG header
 
 describe('ImageClassificationService', () => {
   it('should create default service with classifiers', () => {
@@ -48,7 +48,7 @@ describe('MockClassifier', () => {
     
     assert.strictEqual(result.isBlocked, true);
     assert.strictEqual(result.confidence, 1.0);
-    assert.ok(result.reason.includes('always block'));
+    assert.ok(result.reason?.includes('always block'));
   });
 
   it('should always allow when configured to allow', async () => {
@@ -59,14 +59,14 @@ describe('MockClassifier', () => {
     
     assert.strictEqual(result.isBlocked, false);
     assert.strictEqual(result.confidence, 1.0);
-    assert.ok(result.reason.includes('always allow'));
+    assert.ok(result.reason?.includes('always allow'));
   });
 
   it('should throw error for invalid image buffer', async () => {
     const classifier = new MockClassifier(true);
     
     await assert.rejects(
-      async () => await classifier.classify(null),
+      async () => await classifier.classify(null as any),
       { message: 'Invalid image buffer provided' }
     );
   });

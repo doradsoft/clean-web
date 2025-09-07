@@ -1,14 +1,16 @@
-const ImageClassificationService = require('./ImageClassificationService');
-const BaseClassifier = require('./classifiers/BaseClassifier');
-const MockClassifier = require('./classifiers/MockClassifier');
-const NSFWClassifier = require('./classifiers/NSFWClassifier');
+import { ImageClassificationService } from './ImageClassificationService';
+import { BaseClassifier } from './classifiers/BaseClassifier';
+import { MockClassifier } from './classifiers/MockClassifier';
+import { NSFWClassifier } from './classifiers/NSFWClassifier';
 
-module.exports = {
+export {
   ImageClassificationService,
   BaseClassifier,
   MockClassifier,
   NSFWClassifier
 };
+
+export * from './types';
 
 // If running directly, show usage example
 if (require.main === module) {
@@ -17,7 +19,7 @@ if (require.main === module) {
   console.log('');
   console.log('Usage example:');
   console.log('');
-  console.log('const { ImageClassificationService } = require("./src");');
+  console.log('const { ImageClassificationService } = require("./dist");');
   console.log('const service = ImageClassificationService.createDefault();');
   console.log('');
   console.log('// Classify image with default classifier');
