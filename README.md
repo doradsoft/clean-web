@@ -1,58 +1,69 @@
 # Clean Web
 
-Block problematic images from rendering in web pages (Chrome extension and generic web infrastructure)
+Block problematic images from rendering in web pages using **real AI-powered content analysis**. Available as both a Chrome extension and a web application with completely separated business logic.
 
-- Hides all images elements (img or any other with bg image or even videos) by default
-- Fetches their underlying image
-- Classify its level of nudity using real machine learning models 
-- Block / allow accordingly
+## Real Machine Learning Implementation
 
-## Real NSFW Detection with TensorFlow.js
+This repository includes a **real machine learning-powered** image classification system with:
 
-This repository now includes a **real machine learning-powered** image classification system with:
-
-- **Real NSFW Detection** using TensorFlow.js and nsfwjs libraries
+- **Real NSFW Detection** using TensorFlow.js (@tensorflow/tfjs ^4.22.0) and nsfwjs (^4.2.1) libraries
 - **TypeScript Architecture** with full type safety and modern development experience  
-- **Business Logic Separation** organized in clean, testable modules
-- **React-based UI** for configuration and monitoring
-- **Chrome Extension Ready** build system and structure
+- **Separated Business Logic** organized in clean, testable, framework-agnostic modules
+- **React-based UI** for both web application and Chrome extension popup
+- **Chrome Extension Ready** build system with Manifest V3 compliance
 
 ### Key Features
 
-- **Real ML Classification**: Uses TensorFlow.js (@tensorflow/tfjs ^4.22.0) and nsfwjs (^4.2.1) for actual content analysis
+- **Real ML Classification**: Actual TensorFlow.js and nsfwjs model integration, no mock implementations
 - **Smart Confidence Scoring**: Weighted classification categories (Porn: 1.0, Hentai: 0.9, Sexy: 0.6, etc.)
 - **Graceful Error Handling**: Falls back to URL pattern analysis if ML model fails
 - **Memory Management**: Proper TensorFlow tensor cleanup to prevent memory leaks
 - **Configurable Thresholds**: Adjustable nudity detection sensitivity (0-10 scale)
 - **Allow/Block Lists**: URL pattern-based overrides for trusted/blocked domains
 
-### Quick Start
+## Quick Start
 
+### Chrome Extension
+```bash
+npm install
+npm run build:extension
+```
+Then load the `dist/extension` folder in Chrome's developer mode.
+
+### Web Application  
 ```bash
 npm install
 npm run build
+npm run preview
 ```
 
-### Architecture
+## Architecture
+
+This project uses a **TypeScript + React + Vite** setup with **completely separated business logic**:
 
 ```
 src/
-├── business-logic/          # Core classification and filtering logic
+├── business-logic/          # Core AI-powered image filtering (framework-agnostic)
+│   ├── CleanWebCore.ts      # Main orchestrator
 │   ├── ImageClassifier.ts   # Real TensorFlow.js + nsfwjs implementation
-│   ├── ImageDetector.ts     # DOM image element detection
-│   ├── ImageFilter.ts       # Image hiding/showing logic
-│   └── CleanWebCore.ts      # Main orchestration class
-├── components/              # React UI components
-├── types/                   # TypeScript type definitions
-└── main.tsx                # Application entry point
+│   ├── ImageDetector.ts     # DOM image detection  
+│   ├── ImageFilter.ts       # Image blocking/allowing
+│   └── index.ts             # Business logic exports
+├── extension/               # Chrome Extension (uses business logic)
+│   ├── content.ts           # Content script
+│   ├── background.ts        # Service worker
+│   ├── popup.tsx            # React-based settings popup
+│   ├── popup.html           # Popup HTML
+│   └── manifest.json        # Extension manifest
+├── components/              # React UI components (for web app)
+│   ├── App.tsx              # Main application
+│   ├── CleanWebControls.tsx # Control panel
+│   └── index.ts             # Component exports  
+├── types/                   # TypeScript definitions
+└── main.tsx                 # Web app entry point
 ```
 
-### Development
-
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build for production
-- `npm run build:extension` - Build Chrome extension
-- `npm test` - Validate extension build
+## Features
 
 ### Real NSFW Classification
 
@@ -72,3 +83,105 @@ console.log(analysis);
 //   reasons: ['Neutral: 77.0%', 'Drawing: 23.0%']
 // }
 ```
+
+### Smart Image Analysis
+- **AI-powered nudity detection** with configurable sensitivity (0-10 scale)
+- **Strict mode** for enhanced filtering
+- **Custom allow/block lists** with regex support
+- **Real-time processing** of existing and dynamically added images
+
+### Chrome Extension Capabilities
+- **Automatic image hiding** on page load
+- **Background service worker** for extension lifecycle management
+- **React-based popup UI** for real-time settings adjustment
+- **Chrome storage integration** for settings persistence
+- **Manifest V3 compliance** with proper security permissions
+
+### Web Application
+- **Full React UI** with the same business logic as the extension
+- **Development server** with hot reload
+- **Production builds** optimized for performance
+
+## Development Commands
+
+```bash
+# Install dependencies
+npm install
+
+# Chrome Extension
+npm run build:extension     # Build extension 
+npm run validate            # Validate extension files
+npm test                   # Build and validate extension
+
+# Web Application
+npm run dev                # Start development server
+npm run build              # Build for production
+npm run preview            # Preview production build
+
+# Utilities
+npm run clean              # Clean build directories
+```
+
+## Business Logic Separation
+
+The core image filtering logic is completely framework-agnostic and can be used in:
+
+- ✅ **Chrome Extensions** (content scripts)
+- ✅ **React Applications** (web UI)  
+- ✅ **Node.js Services** (server-side processing)
+- ✅ **Web Workers** (background processing)
+- ✅ **Any JavaScript Environment**
+
+### Core Classes
+
+1. **`CleanWebCore`** - Main orchestrator that coordinates all components
+2. **`ImageClassifier`** - Handles real TensorFlow.js-powered image analysis and nudity detection
+3. **`ImageDetector`** - Finds and monitors image elements in the DOM
+4. **`ImageFilter`** - Manages blocking/allowing of images based on analysis
+
+## Chrome Extension Installation
+
+1. Run `npm run build:extension`
+2. Open Chrome and go to `chrome://extensions/`
+3. Enable "Developer mode" (toggle in top right)
+4. Click "Load unpacked" and select the `dist/extension` folder
+5. The extension will appear in your extensions list
+
+The extension will automatically:
+- Hide images on page load
+- Analyze images using real TensorFlow.js AI classification
+- Show/hide images based on your sensitivity settings
+- Provide a popup UI for adjusting settings in real-time
+
+## Configuration
+
+### Extension Settings (via popup)
+- **Nudity Threshold**: 0 (permissive) to 10 (strict)
+- **Strict Mode**: Enhanced filtering rules
+- **Allow List**: Domains/patterns to always allow
+- **Block List**: Domains/patterns to always block
+
+### Web App Settings (via UI controls)
+- Same settings as extension but with full React UI
+- Real-time statistics and monitoring
+- Advanced debugging and development features
+
+## Technology Stack
+
+- **TensorFlow.js** - Real machine learning for image classification
+- **NSFWJS** - Pre-trained NSFW detection model
+- **TypeScript** - Type safety and better development experience
+- **React** - UI components and state management
+- **Vite** - Fast build tool and development server
+- **Chrome Extension APIs** - Storage, runtime messaging, content scripts
+- **Manifest V3** - Latest Chrome extension standard
+
+## Implementation Details
+
+- **Real Machine Learning**: Actual TensorFlow.js and nsfwjs model integration, no mock implementations
+- **Master Branch Compatibility**: Full integration with existing master branch architecture and interfaces
+- **Memory Management**: Proper TensorFlow tensor cleanup to prevent memory leaks
+- **TypeScript Architecture**: Full type safety with strongly typed interfaces and method signatures
+- **Modern Build System**: Vite + React + TypeScript configuration matching master structure
+- **Error Recovery**: Multiple fallback strategies ensure system reliability
+- **Configurable Thresholds**: Adjustable sensitivity settings for different use cases

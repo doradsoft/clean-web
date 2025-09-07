@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Page for Clean Web Extension</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        img {
+            max-width: 300px;
+            margin: 10px;
+            border: 1px solid #ccc;
+        }
+        .bg-image {
+            width: 200px;
+            height: 150px;
+            background-image: url('https://via.placeholder.com/200x150/ff0000/ffffff?text=Background');
+            background-size: cover;
+            margin: 10px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Clean Web Extension Test Page</h1>
+    <p>This page contains various types of images to test the extension functionality.</p>
+    
+    <div class="test-section">
+        <h2>Regular IMG tags</h2>
+        <img src="https://via.placeholder.com/300x200/0000ff/ffffff?text=Test+Image+1" alt="Test Image 1">
+        <img src="https://via.placeholder.com/300x200/00ff00/000000?text=Test+Image+2" alt="Test Image 2">
+    </div>
+    
+    <div class="test-section">
+        <h2>Background Images</h2>
+        <div class="bg-image" title="Background Image Test"></div>
+        <div style="width: 200px; height: 150px; background-image: url('https://via.placeholder.com/200x150/ff00ff/ffffff?text=CSS+BG'); background-size: cover; margin: 10px; border: 1px solid #ccc;"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Expected Behavior</h2>
+        <p>When the Clean Web extension is loaded:</p>
+        <ul>
+            <li>All images above should be hidden initially</li>
+            <li>After ~1 second, they should become visible (demo behavior)</li>
+            <li>Check the browser console for extension logs</li>
+            <li>Use the extension popup to adjust settings</li>
+        </ul>
+    </div>
+    
+    <script>
+        // Add some dynamic images to test the mutation observer
+        setTimeout(() => {
+            const section = document.querySelector('.test-section');
+            const dynamicImg = document.createElement('img');
+            dynamicImg.src = 'https://via.placeholder.com/250x150/ffff00/000000?text=Dynamic+Image';
+            dynamicImg.alt = 'Dynamic Image';
+            
+            const h3 = document.createElement('h3');
+            h3.textContent = 'Dynamic Image (added after 2 seconds)';
+            
+            section.appendChild(h3);
+            section.appendChild(dynamicImg);
+        }, 2000);
+    </script>
+</body>
+</html>
