@@ -12,13 +12,7 @@ dist
 *.sln
 *.sw?
 
-# Extension build files
-extension/
-public/content.js
-public/background.js
-public/popup.js
-
-# Build artifacts
+# Build artifacts (but keep extension/ for Chrome extension installation)
 *.tsbuildinfo
 
 # Logs
