@@ -1,0 +1,28 @@
+/* Clean Web Extension CSS */
+/* Ensures all image elements are hidden with !important rules */
+
+.clean-web-hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Additional rules to ensure complete hiding */
+img.clean-web-hidden,
+video.clean-web-hidden {
+  width: 0 !important;
+  height: 0 !important;
+  max-width: 0 !important;
+  max-height: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+/* Hide elements with background images */
+*[style*="background-image"].clean-web-hidden {
+  background-image: none !important;
+  background: none !important;
+}

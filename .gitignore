@@ -36,10 +36,10 @@ package-lock.json
 dist/
 dist-extension/
 
-# Old extension files (now in src/extension/)
-manifest.json
-content.js
-content.css
-popup.html
-popup.js
-icon*.png
+# Old extension files from root (now properly organized in src/extension/)
+/manifest.json
+/content.js
+/content.css
+/popup.html
+/popup.js
+/icon*.png
