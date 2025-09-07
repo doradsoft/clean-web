@@ -9,7 +9,6 @@ export class ImageDetector {
   private detectedElements: Set<HTMLElement> = new Set();
 
   /**
-<<<<<<< HEAD
    * Extract src from img elements, including lazy loading attributes
    */
   private extractImageSrc(img: HTMLImageElement): string | null {
@@ -42,14 +41,11 @@ export class ImageDetector {
   }
 
   /**
-=======
->>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
    * Finds all image elements currently in the DOM
    */
   detectImages(): ImageElement[] {
     const images: ImageElement[] = [];
     
-<<<<<<< HEAD
     // Find img elements with lazy loading support
     const imgElements = document.querySelectorAll('img');
     imgElements.forEach(img => {
@@ -58,15 +54,6 @@ export class ImageDetector {
         images.push({
           element: img,
           src: imageUrl,
-=======
-    // Find img elements
-    const imgElements = document.querySelectorAll('img');
-    imgElements.forEach(img => {
-      if (img.src) {
-        images.push({
-          element: img,
-          src: img.src,
->>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
           type: 'img'
         });
       }
@@ -75,7 +62,6 @@ export class ImageDetector {
     // Find elements with background images
     const allElements = document.querySelectorAll('*');
     allElements.forEach(element => {
-<<<<<<< HEAD
       const backgroundImageUrl = this.extractBackgroundImage(element as HTMLElement);
       if (backgroundImageUrl) {
         images.push({
@@ -83,20 +69,6 @@ export class ImageDetector {
           src: backgroundImageUrl,
           type: 'background'
         });
-=======
-      const computedStyle = window.getComputedStyle(element);
-      const backgroundImage = computedStyle.backgroundImage;
-      
-      if (backgroundImage && backgroundImage !== 'none') {
-        const urlMatch = backgroundImage.match(/url\(['"]?(.*?)['"]?\)/);
-        if (urlMatch && urlMatch[1]) {
-          images.push({
-            element: element as HTMLElement,
-            src: urlMatch[1],
-            type: 'background'
-          });
-        }
->>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
       }
     });
 
@@ -117,10 +89,7 @@ export class ImageDetector {
 
   /**
    * Starts observing for new image elements added to the DOM
-<<<<<<< HEAD
    * Enhanced with comprehensive mutation detection
-=======
->>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
    */
   startObserving(onNewImages: (images: ImageElement[]) => void): void {
     if (this.observer) {
@@ -133,10 +102,7 @@ export class ImageDetector {
 
       mutations.forEach((mutation) => {
         if (mutation.type === 'childList') {
-<<<<<<< HEAD
           // Handle added nodes
-=======
->>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
           mutation.addedNodes.forEach((node) => {
             if (node.nodeType === Node.ELEMENT_NODE) {
               const element = node as HTMLElement;
@@ -144,18 +110,11 @@ export class ImageDetector {
               // Check if the added node itself is an image
               if (element.tagName === 'IMG') {
                 const img = element as HTMLImageElement;
-<<<<<<< HEAD
                 const imageUrl = this.extractImageSrc(img);
                 if (imageUrl && !this.detectedElements.has(img)) {
                   newImages.push({
                     element: img,
                     src: imageUrl,
-=======
-                if (img.src && !this.detectedElements.has(img)) {
-                  newImages.push({
-                    element: img,
-                    src: img.src,
->>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
                     type: 'img'
                   });
                   this.detectedElements.add(img);
@@ -163,7 +122,6 @@ export class ImageDetector {
                 }
               }
 
-<<<<<<< HEAD
               // Check for video poster
               if (element.tagName === 'VIDEO') {
                 const video = element as HTMLVideoElement;
@@ -198,22 +156,12 @@ export class ImageDetector {
                   newImages.push({
                     element: img,
                     src: imageUrl,
-=======
-              // Check for images within the added node
-              const childImages = element.querySelectorAll('img');
-              childImages.forEach(img => {
-                if (img.src && !this.detectedElements.has(img)) {
-                  newImages.push({
-                    element: img,
-                    src: img.src,
->>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
                     type: 'img'
                   });
                   this.detectedElements.add(img);
                   hasNewImages = true;
                 }
               });
-<<<<<<< HEAD
 
               // Check for video posters within the added node
               const childVideos = element.querySelectorAll('video');
@@ -295,10 +243,6 @@ export class ImageDetector {
               hasNewImages = true;
             }
           }
-=======
-            }
-          });
->>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
         }
       });
 
@@ -307,18 +251,12 @@ export class ImageDetector {
       }
     });
 
-<<<<<<< HEAD
     // Observe with comprehensive options
     this.observer.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
       attributeFilter: ['src', 'data-src', 'data-lazy-src', 'style', 'class', 'poster']
-=======
-    this.observer.observe(document.body, {
-      childList: true,
-      subtree: true
->>>>>>> e59d59ac8f9c4915bc8b79f299d2037da7245056
     });
   }
 
